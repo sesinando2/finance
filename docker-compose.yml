@@ -1,0 +1,31 @@
+version: "3"
+services:
+  auth:
+    image: hub.docker.com/sesinando2/auth:0.0.1-SNAPSHOT
+    deploy:
+      restart_policy:
+        condition: on-failure
+    ports:
+      - "10080:10080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/auth
+    networks:
+      - webnet
+  finance:
+      image: hub.docker.com/sesinando2/finance:0.0.1-SNAPSHOT
+      depends_on:
+        - auth
+      deploy:
+        restart_policy:
+          condition: on-failure
+      ports:
+        - "10081:10081"
+      environment:
+        - SPRING_DATASOURCE_URL=jdbc:mysql://host.docker.internal:3306/finance
+        - SECURITY_OAUTH2_CLIENT_ACCESS-TOKEN-URI=http://auth:10080/oauth/token
+        - SECURITY_OAUTH2_CLIENT_USER-AUTHORIZATION-URI=http://auth:10080/oauth/authorize
+        - SECURITY_OAUTH2_RESOURCE_JWT_KEY-SET-URI=http://auth:10080/oauth/token_key
+      networks:
+        - webnet
+networks:
+  webnet:

@@ -1,0 +1,112 @@
+def applicationProperties = new Properties()
+applicationProperties.load(new FileReader("$projectDir//src/main/resources/application.properties"))
+
+buildscript {
+	ext {
+		springBootVersion = '1.5.10.RELEASE'
+	}
+	repositories {
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}")
+		classpath('org.liquibase:liquibase-gradle-plugin:1.2.0')
+		classpath('org.liquibase:liquibase-core')
+		classpath('org.liquibase.ext:liquibase-hibernate5:3.6')
+		classpath('mysql:mysql-connector-java:5.1.13')
+		classpath('org.yaml:snakeyaml:1.17')
+		classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.13.0')
+	}
+}
+
+apply plugin: 'groovy'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'liquibase'
+apply plugin: 'com.palantir.docker'
+
+docker {
+	dependsOn build
+	name "${repo}:${version}"
+	files jar.archivePath
+	buildArgs(['JAR_FILE': "${jar.archiveName}"])
+}
+
+liquibase {
+	activities {
+		main {
+			classpath "$projectDir/src/main"
+			changeLogFile "$projectDir/src/main/resources/db/changelog/db.changelog-master.yaml"
+			url applicationProperties['spring.datasource.url']
+			username applicationProperties['spring.datasource.username']
+			password applicationProperties['spring.datasource.password']
+			referenceUrl "hibernate:spring:net.dlcruz.dao.domain?dialect=${applicationProperties['spring.jpa.properties.hibernate.dialect']}"
+		}
+	}
+}
+
+group = 'net.dlcruz'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	compile('org.springframework.boot:spring-boot-starter')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile('org.springframework.boot:spring-boot-starter-security')
+	compile('org.springframework.boot:spring-boot-starter-data-jpa')
+	compile('org.codehaus.groovy:groovy')
+
+	// Security
+	compile('org.springframework.security:spring-security-jwt:1.0.7.RELEASE')
+	compile('org.springframework.security.oauth:spring-security-oauth2:2.1.0.RELEASE')
+
+	compile('org.liquibase:liquibase-core')
+	runtime('mysql:mysql-connector-java')
+
+	// Test Dependencies
+	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile('org.spockframework:spock-core:1.1-groovy-2.4')
+	testCompile('org.spockframework:spock-spring:1.1-groovy-2.4')
+	testRuntime('cglib:cglib-nodep:3.2.4')
+	testRuntime('org.objenesis:objenesis:2.6')
+
+    // Development
+    compile('org.springframework.boot:spring-boot-devtools')
+
+	// Google Guava
+	compile('com.google.guava:guava:24.1-jre')
+
+	// Joda Time
+	compile 'joda-time:joda-time:2.10'
+
+}
+
+sourceSets {
+	integrationTest {
+		groovy {
+			compileClasspath += main.output
+			compileClasspath += main.compileClasspath
+			compileClasspath += test.output
+			compileClasspath += test.compileClasspath
+			runtimeClasspath += test.runtimeClasspath
+		}
+	}
+}
+
+task integrationTest(type: Test) {
+	testClassesDir = sourceSets.integrationTest.output.classesDir
+	classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+check {
+	dependsOn integrationTest
+}
