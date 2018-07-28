@@ -34,5 +34,7 @@ class FrequencyServiceSpec extends Specification {
         MONTHLY     | ANNUALLY      | 1         | 12
         ANNUALLY    | WEEKLY        | 52.1429   | 1
         WEEKLY      | MONTHLY       | 470       | 2042.2628
+        MONTHLY     | FORTNIGHTLY   | 300       | 138.0821312517
+        MONTHLY     | WEEKLY        | 300       | 69.0410656258
     }
 }

@@ -24,6 +24,7 @@ class FrequencyService {
         (ANNUALLY..WEEKLY)      : { BigDecimal value -> value / 52.1429},
         (ANNUALLY..DAILY)       : { BigDecimal value -> value / 365 },
 
+        (MONTHLY..FORTNIGHTLY)  : { BigDecimal value -> value / 2.17262 },
         (MONTHLY..WEEKLY)       : { BigDecimal value -> value / 4.34524 },
         (MONTHLY..DAILY)        : { BigDecimal value -> value / 30.4167 },
 
