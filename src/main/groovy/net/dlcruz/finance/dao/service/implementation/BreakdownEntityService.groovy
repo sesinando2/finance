@@ -61,6 +61,8 @@ class BreakdownEntityService implements BreakdownService {
                     return 1.day.ago
                 case Frequency.WEEKLY:
                     return 1.week.ago
+                case Frequency.FORTNIGHTLY:
+                    return 2.weeks.ago
                 case Frequency.MONTHLY:
                     return 1.month.ago
                 case Frequency.ANNUALLY:
