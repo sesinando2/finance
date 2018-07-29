@@ -41,7 +41,7 @@ liquibase {
 	activities {
 		main {
 			classpath "$projectDir/src/main"
-			changeLogFile "$projectDir/src/main/resources/db/changelog/db.changelog-master.yaml"
+			changeLogFile "$projectDir/src/main/resources/db/changelog/db.changelog-master.groovy"
 			url applicationProperties['spring.datasource.url']
 			username applicationProperties['spring.datasource.username']
 			password applicationProperties['spring.datasource.password']
@@ -88,6 +88,8 @@ dependencies {
 	// Joda Time
 	compile 'joda-time:joda-time:2.10'
 
+	// Liquibase Groovy DSL
+	compile('org.liquibase:liquibase-groovy-dsl:1.2.2')
 }
 
 sourceSets {
