@@ -32,7 +32,7 @@ apply plugin: 'com.palantir.docker'
 
 docker {
 	dependsOn build
-	name "${repo}:${version}"
+	name project.name
 	files jar.archivePath
 	buildArgs(['JAR_FILE': "${jar.archiveName}"])
 }

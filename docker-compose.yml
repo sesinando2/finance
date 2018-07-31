@@ -1,7 +1,7 @@
 version: "3"
 services:
   auth:
-    image: sesinando2/auth:0.0.1-SNAPSHOT
+    image: auth
     deploy:
       restart_policy:
         condition: on-failure
@@ -12,7 +12,7 @@ services:
     networks:
       - webnet
   finance:
-      image: sesinando2/finance:0.0.1-SNAPSHOT
+      image: finance
       depends_on:
         - auth
       deploy:
