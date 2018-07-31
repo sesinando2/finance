@@ -1,0 +1,49 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: finance
+  labels:
+    app: finance
+spec:
+  template:
+    metadata:
+      labels:
+        app: finance
+    spec:
+      containers:
+        - name: finance
+          image: gcr.io/alert-synapse-211723/finance:0.0.1
+          ports:
+            - containerPort: 10081
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:mysql://127.0.0.1:3306/finance
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-db-credentials
+                  key: password
+            - name: SECURITY_OAUTH2_CLIENT_ACCESS-TOKEN-URI
+              value: http://127.0.0.1:10080/oauth/token
+            - name: SECURITY_OAUTH2_CLIENT_USER-AUTHORIZATION-URI
+              value: http://127.0.0.1:10080/oauth/authorize
+            - name: SECURITY_OAUTH2_RESOURCE_JWT_KEY-SET-URI
+              value: http://127.0.0.1:10080/oauth/token_key
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy",
+                    "-instances=alert-synapse-211723:australia-southeast1:mysql-db=tcp:3306",
+                    "-credential_file=/secrets/cloudsql/credentials.json"]
+          volumeMounts:
+            - name: cloudsql-instance-credentials
+              mountPath: /secrets/cloudsql
+              readOnly: true
+      volumes:
+        - name: cloudsql-instance-credentials
+          secret:
+            secretName: cloudsql-instance-credentials
