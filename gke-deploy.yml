@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: finance-api
-          image: gcr.io/alert-synapse-211723/finance:0.0.1
+          image: gcr.io/alert-synapse-211723/finance:0.0.2
           ports:
             - containerPort: 10081
           env:
