@@ -10,6 +10,12 @@ import net.dlcruz.finance.dao.service.AccountService
 import net.dlcruz.finance.dao.service.AllocationService
 import net.dlcruz.finance.dao.service.BreakdownService
 import net.dlcruz.finance.dao.service.BudgetService
+import net.dlcruz.finance.dao.service.TransactionService
+import org.joda.time.Days
+import org.joda.time.Interval
+import org.joda.time.Months
+import org.joda.time.Weeks
+import org.joda.time.Years
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -25,6 +31,29 @@ class BreakdownEntityService implements BreakdownService {
     @Autowired
     AllocationService allocationService
 
+    @Autowired
+    TransactionService transactionService
+
+    @Override
+    Breakdown getTotalBreakdown(Frequency frequency, Account account) {
+        def accountBudgets = budgetService.findAllByAccount(account)
+        def startingDate = getStartingDateForBreakdown(frequency)
+        def allocations = allocationService.findAllByAccountStartingFrom(account, startingDate)
+        def totalCredit = allocationService.getOverallCredit(account)
+        def totalDebit = allocationService.getOverallDebit(account) * (-1)
+        def firstTransactionDate = transactionService.getFirstTransactionDate(account)
+        def lastTransactionDate = transactionService.getLastTransactionDate(account)
+
+        new Breakdown(
+            account: account,
+            label: account.name,
+            balance: account.balance,
+            totalDebit: calculateTotalDebit(allocations),
+            totalCredit: calculateTotalCredit(allocations),
+            allocatedAmount: accountBudgets.collect(this.&getAllocatedAmount.rcurry(frequency)).sum()
+        ).with(this.&setRates.curry(frequency, totalCredit, totalDebit, firstTransactionDate, lastTransactionDate))
+    }
+
     @Override
     List<Breakdown> getBreakdown(Frequency frequency, Account account = null) {
         def accounts = account ? [account] : accountService.list()
@@ -35,7 +64,9 @@ class BreakdownEntityService implements BreakdownService {
         def accountBudgets = budgetService.findAllByAccount(account)
         def startingDate = getStartingDateForBreakdown(frequency)
         def accountAllocations = allocationService.findAllByAccountStartingFrom(account, startingDate)
-        accountAllocations.groupBy { it.name }.collect(this.&createBreakdown.curry(frequency, account, accountBudgets))
+        accountAllocations.groupBy { it.name }
+                .collect(this.&createBreakdown.curry(frequency, account, accountBudgets))
+                .collect(this.&setAllocationRates.curry(frequency, account))
     }
 
     private Breakdown createBreakdown(Frequency frequency, Account account, List<Budget> accountBudgets,
@@ -44,13 +75,13 @@ class BreakdownEntityService implements BreakdownService {
         def budget = accountBudgets.find { it.name == name }
 
         new Breakdown(
-                account: account,
-                budget: budget,
-                label: name,
-                balance: allocationService.getAllocationBalance(account, name),
-                totalDebit:  allocationService.sum(allocations.findAll { it.amount < 0 }) * (-1),
-                totalCredit: allocationService.sum(allocations.findAll { it.amount >= 0 }),
-                allocatedAmount: getAllocatedAmount(budget, frequency)
+            account: account,
+            budget: budget,
+            label: name,
+            balance: allocationService.getAllocationBalance(account, name),
+            totalDebit: calculateTotalDebit(allocations),
+            totalCredit: calculateTotalCredit(allocations),
+            allocatedAmount: getAllocatedAmount(budget, frequency)
         )
     }
 
@@ -73,5 +104,47 @@ class BreakdownEntityService implements BreakdownService {
 
     private BigDecimal getAllocatedAmount(Budget budget, Frequency frequency) {
         budget?.with(budgetService.&convert.rcurry(frequency) >> budgetService.&round)?.amount ?: 0
+    }
+
+    private Breakdown setAllocationRates(Frequency frequency, Account account, Breakdown breakdown) {
+        def overallCredit = allocationService.getOverallCredit(account, breakdown.label)
+        def overallDebit = allocationService.getOverallDebit(account, breakdown.label) * (-1)
+        def first = allocationService.getFirstTransactionDate(account, breakdown.label)
+        def last = allocationService.getlastTransactionDate(account, breakdown.label)
+        breakdown.with(this.&setRates.curry(frequency, overallCredit, overallDebit, first, last))
+    }
+
+    private Breakdown setRates(Frequency frequency, BigDecimal credit, BigDecimal debit, Date first, Date last, Breakdown breakdown) {
+        def duration = getDuration(first, last, frequency)
+        def divisor = [1, duration].max()
+        breakdown.incomeRate = credit / divisor
+        breakdown.expenseRate = debit / divisor
+        breakdown
+    }
+
+    private int getDuration(Date first, Date last, Frequency frequency) {
+
+        def interval = new Interval(first.clearTime().time, last.clearTime().time)
+
+        switch (frequency) {
+            case Frequency.DAILY:
+                return Days.daysIn(interval).days
+            case Frequency.WEEKLY:
+                return Weeks.weeksIn(interval).weeks
+            case Frequency.FORTNIGHTLY:
+                return Weeks.weeksIn(interval).weeks / 2
+            case Frequency.MONTHLY:
+                return Months.monthsIn(interval).months
+            case Frequency.ANNUALLY:
+                return Years.yearsIn(interval).years
+        }
+    }
+
+    private BigDecimal calculateTotalCredit(List<Allocation> allocations) {
+        allocationService.sum(allocations.findAll { it.amount >= 0 })
+    }
+
+    private BigDecimal calculateTotalDebit(List<Allocation> allocations) {
+        allocationService.sum(allocations.findAll { it.amount < 0 }) * (-1)
     }
 }

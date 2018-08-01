@@ -18,6 +18,18 @@ interface AllocationService extends EntityService<Allocation, Long> {
 
     BigDecimal getAllocationBalance(Account account, String name)
 
+    BigDecimal getOverallDebit(Account account)
+
+    BigDecimal getOverallDebit(Account account, String name)
+
+    BigDecimal getOverallCredit(Account account)
+
+    BigDecimal getOverallCredit(Account account, String name)
+
+    Date getFirstTransactionDate(Account account, String name)
+
+    Date getlastTransactionDate(Account account, String name)
+
     List<Allocation> findAllByTransaction(Transaction transaction)
 
     BigDecimal getTransactionTotal(Transaction transaction)

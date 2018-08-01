@@ -6,6 +6,8 @@ import net.dlcruz.finance.dao.domain.Frequency
 
 interface BreakdownService {
 
+    Breakdown getTotalBreakdown(Frequency frequency, Account account)
+
     List<Breakdown> getBreakdown(Frequency frequency, Account account)
 
     List<Breakdown> getBreakdown(Frequency frequency)

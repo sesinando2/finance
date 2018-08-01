@@ -1,5 +1,6 @@
 package net.dlcruz.finance.dao.service.implementation
 
+import groovy.time.TimeCategory
 import net.dlcruz.finance.api.exception.ObjectValidationException
 import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Allocation
@@ -65,6 +66,36 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     @Override
     BigDecimal getAllocationBalance(Account account, String name) {
         repository.getAllocationBalance(account, name)
+    }
+
+    @Override
+    BigDecimal getOverallDebit(Account account) {
+        repository.getOverallDebit(account) ?: 0
+    }
+
+    @Override
+    BigDecimal getOverallDebit(Account account, String name) {
+        repository.getOverallDebit(account, name) ?: 0
+    }
+
+    @Override
+    BigDecimal getOverallCredit(Account account) {
+        repository.getOverallCredit(account) ?: 0
+    }
+
+    @Override
+    BigDecimal getOverallCredit(Account account, String name) {
+        repository.getOverallCredit(account, name) ?: 0
+    }
+
+    @Override
+    Date getFirstTransactionDate(Account account, String name) {
+        repository.getFirstTransactionDate(account, name) ?: TimeCategory.getDay(1).ago
+    }
+
+    @Override
+    Date getlastTransactionDate(Account account, String name) {
+        repository.getLastTransactionDate(account, name) ?: new Date()
     }
 
     @Override

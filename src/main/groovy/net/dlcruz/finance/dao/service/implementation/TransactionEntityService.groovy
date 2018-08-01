@@ -35,4 +35,14 @@ class TransactionEntityService extends BaseEntityService<Transaction, Long> impl
     Page<Transaction> findAllByAccount(Account account, Pageable pageable) {
         repository.findAllByAccountOrderByDateDescIdDesc(account, pageable)
     }
+
+    @Override
+    Date getFirstTransactionDate(Account account) {
+        repository.getFirstTransactionDate(account)
+    }
+
+    @Override
+    Date getLastTransactionDate(Account account) {
+        repository.getLastTransactionDate(account)
+    }
 }

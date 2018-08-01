@@ -19,9 +19,11 @@ class Account implements JpaEntity<Long> {
 
     String description
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = 'account', orphanRemoval = true)
     Set<Transaction> transactions
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = 'account', orphanRemoval = true)
     Set<Budget> budgets
 

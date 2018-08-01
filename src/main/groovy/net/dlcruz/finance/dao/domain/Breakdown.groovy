@@ -8,7 +8,11 @@ class Breakdown {
     String label
 
     BigDecimal balance
-    BigDecimal totalCredit
+
     BigDecimal totalDebit
+    BigDecimal totalCredit
     BigDecimal allocatedAmount
+
+    BigDecimal incomeRate
+    BigDecimal expenseRate
 }

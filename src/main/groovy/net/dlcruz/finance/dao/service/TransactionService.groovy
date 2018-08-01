@@ -11,4 +11,8 @@ interface TransactionService extends EntityService<Transaction, Long> {
     List<Transaction> findAllByAccount(Account account)
 
     Page<Transaction> findAllByAccount(Account account, Pageable pageable)
+
+    Date getFirstTransactionDate(Account account)
+
+    Date getLastTransactionDate(Account account)
 }

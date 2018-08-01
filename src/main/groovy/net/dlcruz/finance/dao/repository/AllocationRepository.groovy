@@ -29,6 +29,24 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
     BigDecimal getAllocationBalance(@Param('account') Account account, @Param('name') String name)
 
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.amount < 0')
+    BigDecimal getOverallDebit(@Param('account') Account account)
+
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and a.amount < 0')
+    BigDecimal getOverallDebit(@Param('account') Account account, @Param('name') String name)
+
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.amount > 0')
+    BigDecimal getOverallCredit(@Param('account') Account account)
+
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and a.amount > 0')
+    BigDecimal getOverallCredit(@Param('account') Account account, @Param('name') String name)
+
+    @Query('select min(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
+    Date getFirstTransactionDate(@Param('account') Account account, @Param('name') String name)
+
+    @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
+    Date getLastTransactionDate(@Param('account') Account account, @Param('name') String name)
+
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t = :transaction')
     BigDecimal getTransactionTotal(@Param('transaction') Transaction transaction)
 }

@@ -32,6 +32,13 @@ class AccountController extends BaseEntityController<Account, Long> {
     @Autowired
     private GoalService goalService
 
+    @GetMapping('/{id}/total-{frequency}-breakdown')
+    Breakdown getTotalBreakdown(@PathVariable Long id, @PathVariable('frequency') String frequencyString) {
+        def account = getEntityAndThrowIfNotFound(id)
+        def frequency = frequencyService.getFrequencyFrom(frequencyString)
+        breakdownService.getTotalBreakdown(frequency, account)
+    }
+
     @GetMapping('/{id}/{frequency}-breakdown')
     List<Breakdown> getBreakdown(@PathVariable Long id, @PathVariable('frequency') String frequencyString) {
         def account = getEntityAndThrowIfNotFound(id)
