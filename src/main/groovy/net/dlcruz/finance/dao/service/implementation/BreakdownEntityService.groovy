@@ -42,6 +42,12 @@ class BreakdownEntityService implements BreakdownService {
     }
 
     private Breakdown getTotalBreakdownFor(Frequency frequency, List<Account> accounts, String label) {
+        def breakdown = new Breakdown()
+
+        if (accounts.empty) {
+            return breakdown
+        }
+
         def accountBudgets = accounts.collectMany(budgetService.&findAllByAccount)
         def startingDate = getStartingDateForBreakdown(frequency)
         def allocations = accounts.collectMany(allocationService.&findAllByAccountStartingFrom.rcurry(startingDate))
@@ -50,13 +56,13 @@ class BreakdownEntityService implements BreakdownService {
         def firstTransactionDate = accounts.collect(transactionService.&getFirstTransactionDate).min()
         def lastTransactionDate = accounts.collect(transactionService.&getLastTransactionDate).max()
 
-        new Breakdown(
-            label: label,
-            balance: accounts*.balance.sum(),
-            totalDebit: calculateTotalDebit(allocations),
-            totalCredit: calculateTotalCredit(allocations),
-            allocatedAmount: accountBudgets.collect(this.&getAllocatedAmount.rcurry(frequency)).sum()
-        ).with(this.&setRates.curry(frequency, totalCredit, totalDebit, firstTransactionDate, lastTransactionDate))
+        return breakdown.with {
+            it.label = label
+            it.balance = accounts*.balance.sum()
+            it.totalDebit = calculateTotalDebit(allocations)
+            it.totalCredit = calculateTotalCredit(allocations)
+            it.allocatedAmount = accountBudgets.collect(this.&getAllocatedAmount.rcurry(frequency)).sum()
+        }.with(this.&setRates.curry(frequency, totalCredit, totalDebit, firstTransactionDate, lastTransactionDate))
     }
 
     @Override
