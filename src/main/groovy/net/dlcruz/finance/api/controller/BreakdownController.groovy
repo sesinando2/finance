@@ -25,4 +25,10 @@ class BreakdownController {
         def frequency = frequencyService.getFrequencyFrom(frequencyString)
         breakdownService.getBreakdown(frequency)
     }
+
+    @GetMapping('/total-{frequency}-breakdown')
+    Breakdown getTotal(@PathVariable('frequency') String frequencyString) {
+        def frequency = frequencyService.getFrequencyFrom(frequencyString)
+        breakdownService.getTotalBreakdown(frequency)
+    }
 }

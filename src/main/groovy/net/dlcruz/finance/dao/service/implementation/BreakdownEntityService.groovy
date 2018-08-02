@@ -35,19 +35,24 @@ class BreakdownEntityService implements BreakdownService {
     TransactionService transactionService
 
     @Override
-    Breakdown getTotalBreakdown(Frequency frequency, Account account) {
-        def accountBudgets = budgetService.findAllByAccount(account)
+    Breakdown getTotalBreakdown(Frequency frequency, Account account = null) {
+        def accounts = account ? [account] : accountService.list()
+        def label = account ? account.name : 'All Accounts'
+        getTotalBreakdownFor(frequency, accounts, label)
+    }
+
+    private Breakdown getTotalBreakdownFor(Frequency frequency, List<Account> accounts, String label) {
+        def accountBudgets = accounts.collectMany(budgetService.&findAllByAccount)
         def startingDate = getStartingDateForBreakdown(frequency)
-        def allocations = allocationService.findAllByAccountStartingFrom(account, startingDate)
-        def totalCredit = allocationService.getOverallCredit(account)
-        def totalDebit = allocationService.getOverallDebit(account) * (-1)
-        def firstTransactionDate = transactionService.getFirstTransactionDate(account)
-        def lastTransactionDate = transactionService.getLastTransactionDate(account)
+        def allocations = accounts.collectMany(allocationService.&findAllByAccountStartingFrom.rcurry(startingDate))
+        def totalCredit = accounts.collect(allocationService.&getOverallCredit).sum()
+        def totalDebit = accounts.collect(allocationService.&getOverallDebit).collect { it * (-1) }.sum()
+        def firstTransactionDate = accounts.collect(transactionService.&getFirstTransactionDate).min()
+        def lastTransactionDate = accounts.collect(transactionService.&getLastTransactionDate).max()
 
         new Breakdown(
-            account: account,
-            label: account.name,
-            balance: account.balance,
+            label: label,
+            balance: accounts*.balance.sum(),
             totalDebit: calculateTotalDebit(allocations),
             totalCredit: calculateTotalCredit(allocations),
             allocatedAmount: accountBudgets.collect(this.&getAllocatedAmount.rcurry(frequency)).sum()
