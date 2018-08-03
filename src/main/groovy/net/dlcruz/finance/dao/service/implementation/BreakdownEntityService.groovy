@@ -41,6 +41,12 @@ class BreakdownEntityService implements BreakdownService {
         getTotalBreakdownFor(frequency, accounts, label)
     }
 
+    @Override
+    List<Breakdown> getBreakdown(Frequency frequency, Account account = null) {
+        def accounts = account ? [account] : accountService.list()
+        accounts.collectMany(this.&getBreakdownBy.curry(frequency))
+    }
+
     private Breakdown getTotalBreakdownFor(Frequency frequency, List<Account> accounts, String label) {
         def breakdown = new Breakdown()
 
@@ -62,13 +68,8 @@ class BreakdownEntityService implements BreakdownService {
             it.totalDebit = calculateTotalDebit(allocations)
             it.totalCredit = calculateTotalCredit(allocations)
             it.allocatedAmount = accountBudgets.collect(this.&getAllocatedAmount.rcurry(frequency)).sum()
+            it
         }.with(this.&setRates.curry(frequency, totalCredit, totalDebit, firstTransactionDate, lastTransactionDate))
-    }
-
-    @Override
-    List<Breakdown> getBreakdown(Frequency frequency, Account account = null) {
-        def accounts = account ? [account] : accountService.list()
-        accounts.collectMany(this.&getBreakdownBy.curry(frequency))
     }
 
     private List<Breakdown> getBreakdownBy(Frequency frequency, Account account) {

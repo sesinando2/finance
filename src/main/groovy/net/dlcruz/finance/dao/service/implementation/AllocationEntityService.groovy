@@ -90,12 +90,12 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
 
     @Override
     Date getFirstTransactionDate(Account account, String name) {
-        repository.getFirstTransactionDate(account, name) ?: TimeCategory.getDay(1).ago
+        repository.getFirstTransactionDate(account, name)?.toCalendar()?.time ?: TimeCategory.getDay(1).ago
     }
 
     @Override
     Date getlastTransactionDate(Account account, String name) {
-        repository.getLastTransactionDate(account, name) ?: new Date()
+        repository.getLastTransactionDate(account, name)?.toCalendar()?.time ?: new Date()
     }
 
     @Override

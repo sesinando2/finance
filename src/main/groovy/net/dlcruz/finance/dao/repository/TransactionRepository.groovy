@@ -9,6 +9,8 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
+import java.sql.Timestamp
+
 @Repository
 interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
@@ -17,8 +19,8 @@ interface TransactionRepository extends JpaRepository<Transaction, Long> {
     Page<Transaction> findAllByAccountOrderByDateDescIdDesc(Account account, Pageable pageable)
 
     @Query('select min(t.date) from Transaction t where t.account = :account')
-    Date getFirstTransactionDate(@Param('account') Account account)
+    Timestamp getFirstTransactionDate(@Param('account') Account account)
 
     @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account')
-    Date getLastTransactionDate(@Param('account') Account account)
+    Timestamp getLastTransactionDate(@Param('account') Account account)
 }

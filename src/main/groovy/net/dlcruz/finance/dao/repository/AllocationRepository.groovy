@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
+import java.sql.Timestamp
+
 @Repository
 interface AllocationRepository extends JpaRepository<Allocation, Long> {
 
@@ -42,10 +44,10 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
     BigDecimal getOverallCredit(@Param('account') Account account, @Param('name') String name)
 
     @Query('select min(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
-    Date getFirstTransactionDate(@Param('account') Account account, @Param('name') String name)
+    Timestamp getFirstTransactionDate(@Param('account') Account account, @Param('name') String name)
 
     @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
-    Date getLastTransactionDate(@Param('account') Account account, @Param('name') String name)
+    Timestamp getLastTransactionDate(@Param('account') Account account, @Param('name') String name)
 
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t = :transaction')
     BigDecimal getTransactionTotal(@Param('transaction') Transaction transaction)

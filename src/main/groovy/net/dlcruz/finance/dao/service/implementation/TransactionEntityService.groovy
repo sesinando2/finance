@@ -38,11 +38,11 @@ class TransactionEntityService extends BaseEntityService<Transaction, Long> impl
 
     @Override
     Date getFirstTransactionDate(Account account) {
-        repository.getFirstTransactionDate(account)
+        repository.getFirstTransactionDate(account).toCalendar().time
     }
 
     @Override
     Date getLastTransactionDate(Account account) {
-        repository.getLastTransactionDate(account)
+        repository.getLastTransactionDate(account).toCalendar().time
     }
 }
