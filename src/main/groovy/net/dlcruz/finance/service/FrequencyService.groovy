@@ -11,11 +11,11 @@ class FrequencyService {
 
     private static final Map<Range<Frequency>, Closure<BigDecimal>> conversions = [
         (DAILY..WEEKLY)         : { BigDecimal value -> value * 7 },
-        (DAILY..ANNUALLY)       : { BigDecimal value -> value * 365 },
+        (DAILY..ANNUALLY)       : { BigDecimal value -> value * 365.25 },
         (WEEKLY..FORTNIGHTLY)   : { BigDecimal value -> value * 2 },
         (MONTHLY..ANNUALLY)     : { BigDecimal value -> value * 12 },
         (ANNUALLY..MONTHLY)     : { BigDecimal value -> value / 12 },
-        (ANNUALLY..DAILY)       : { BigDecimal value -> value / 365 },
+        (ANNUALLY..DAILY)       : { BigDecimal value -> value / 365.25 },
         (FORTNIGHTLY..WEEKLY)   : { BigDecimal value -> value / 2 },
         (WEEKLY..DAILY)         : { BigDecimal value -> value / 7 }
     ].asImmutable()

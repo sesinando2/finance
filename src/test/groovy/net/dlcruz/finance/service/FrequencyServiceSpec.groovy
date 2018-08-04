@@ -31,12 +31,12 @@ class FrequencyServiceSpec extends Specification {
         WEEKLY      | FORTNIGHTLY   | 25        | 50
         DAILY       | WEEKLY        | 1         | 7
         DAILY       | DAILY         | 1         | 1
-        MONTHLY     | DAILY         | 50        | 1.6438356164
-        DAILY       | ANNUALLY      | 1         | 365
+        MONTHLY     | DAILY         | 50        | 1.6427104723
+        DAILY       | ANNUALLY      | 1         | 365.25
         MONTHLY     | ANNUALLY      | 1         | 12
-        ANNUALLY    | WEEKLY        | 53        | 1.0164383565
-        WEEKLY      | MONTHLY       | 470       | 2042.2619047632
-        MONTHLY     | FORTNIGHTLY   | 300       | 138.0821917804
-        MONTHLY     | WEEKLY        | 300       | 69.0410958902
+        ANNUALLY    | WEEKLY        | 52        | 0.9965776863
+        WEEKLY      | MONTHLY       | 470       | 2043.66071428701875
+        MONTHLY     | FORTNIGHTLY   | 300       | 137.9876796718
+        MONTHLY     | WEEKLY        | 300       | 68.9938398359
     }
 }
