@@ -15,8 +15,8 @@ class FrequencyService {
         (WEEKLY..FORTNIGHTLY)   : { BigDecimal value -> value * 2 },
         (MONTHLY..ANNUALLY)     : { BigDecimal value -> value * 12 },
         (ANNUALLY..MONTHLY)     : { BigDecimal value -> value / 12 },
-        (ANNUALLY..DAILY)       : { BigDecimal value -> value / 365.25 },
         (FORTNIGHTLY..WEEKLY)   : { BigDecimal value -> value / 2 },
+        (ANNUALLY..DAILY)       : { BigDecimal value -> value / 365.25 },
         (WEEKLY..DAILY)         : { BigDecimal value -> value / 7 }
     ].asImmutable()
 
