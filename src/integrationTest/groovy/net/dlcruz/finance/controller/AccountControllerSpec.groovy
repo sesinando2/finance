@@ -94,7 +94,7 @@ class AccountControllerSpec extends BaseControllerSpec {
         budget = budgetResponse
     }
 
-    void 'should be able to get the list of budget for an account'() {
+    void 'should be able to get the list of #frequency budget for an account'() {
         when:
         def response = restTemplate.getForEntity("/account/{id}/${frequency.name().toLowerCase()}-budget", List, account.id)
 
@@ -114,8 +114,8 @@ class AccountControllerSpec extends BaseControllerSpec {
 
         where:
         frequency           | amount
-        Frequency.ANNUALLY  | 26072
-        Frequency.MONTHLY   | 2173
+        Frequency.ANNUALLY  | 26090
+        Frequency.MONTHLY   | 2175
         Frequency.WEEKLY    | 500
         Frequency.DAILY     | 72
     }
@@ -270,11 +270,11 @@ class AccountControllerSpec extends BaseControllerSpec {
 
         where:
         frequency   | balance   | totalDebit    | totalCredit   | allocatedAmount | amount | date
-        'annually'  | 250       | 0             | 250           | 26072           | 250    | getMonths(3).ago
-        'annually'  | 0         | 250           | 250           | 26072           | -250   | getMonths(2).ago
-        'monthly'   | 2173      | 0             | 2173          | 2173            | 2173   | getWeeks(2).ago
-        'weekly'    | 1673      | 500           | 0             | 500             | -500   | getDays(2).ago
-        'daily'     | 1203      | 470           | 0             | 72              | -470   | new Date()
+        'annually'  | 250       | 0             | 250           | 26090           | 250    | getMonths(3).ago
+        'annually'  | 0         | 250           | 250           | 26090           | -250   | getMonths(2).ago
+        'monthly'   | 2175      | 0             | 2175          | 2175            | 2175   | getWeeks(2).ago
+        'weekly'    | 1675      | 500           | 0             | 500             | -500   | getDays(2).ago
+        'daily'     | 1205      | 470           | 0             | 72              | -470   | new Date()
     }
 
     void 'should be able to delete an account'() {
