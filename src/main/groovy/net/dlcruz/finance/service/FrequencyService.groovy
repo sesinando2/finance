@@ -11,26 +11,13 @@ class FrequencyService {
 
     private static final Map<Range<Frequency>, Closure<BigDecimal>> conversions = [
         (DAILY..WEEKLY)         : { BigDecimal value -> value * 7 },
-        (DAILY..MONTHLY)        : { BigDecimal value -> value * 30.4167 },
         (DAILY..ANNUALLY)       : { BigDecimal value -> value * 365 },
-
         (WEEKLY..FORTNIGHTLY)   : { BigDecimal value -> value * 2 },
-        (WEEKLY..MONTHLY)       : { BigDecimal value -> value * 4.34524 },
-        (WEEKLY..ANNUALLY)      : { BigDecimal value -> value * 52.1429 },
-
         (MONTHLY..ANNUALLY)     : { BigDecimal value -> value * 12 },
-
         (ANNUALLY..MONTHLY)     : { BigDecimal value -> value / 12 },
-        (ANNUALLY..WEEKLY)      : { BigDecimal value -> value / 52.1429},
         (ANNUALLY..DAILY)       : { BigDecimal value -> value / 365 },
-
-        (MONTHLY..FORTNIGHTLY)  : { BigDecimal value -> value / 2.17262 },
-        (MONTHLY..WEEKLY)       : { BigDecimal value -> value / 4.34524 },
-        (MONTHLY..DAILY)        : { BigDecimal value -> value / 30.4167 },
-
         (FORTNIGHTLY..WEEKLY)   : { BigDecimal value -> value / 2 },
-
-        (WEEKLY..DAILY)         : { BigDecimal value -> value / 7 },
+        (WEEKLY..DAILY)         : { BigDecimal value -> value / 7 }
     ].asImmutable()
 
     Frequency getFrequencyFrom(String frequencyString) {
@@ -62,8 +49,8 @@ class FrequencyService {
     private List<Frequency> findConversionPath(Frequency from, Frequency to) {
         List<Frequency> path = []
 
-        def frequenciesToCheck = (from..to).asList()
-        def currentNode = frequenciesToCheck.first()
+        def frequenciesToCheck = Frequency.values().toList()
+        def currentNode = from
 
         while (currentNode != to) {
             def nextNode = findNextNode(currentNode, frequenciesToCheck - path)

@@ -2,9 +2,11 @@ package net.dlcruz.finance.service
 
 import spock.lang.Specification
 import spock.lang.Subject
+import spock.lang.Unroll
 
 import static net.dlcruz.finance.dao.domain.Frequency.*
 
+@Unroll
 class FrequencyServiceSpec extends Specification {
 
     @Subject FrequencyService service
@@ -13,7 +15,7 @@ class FrequencyServiceSpec extends Specification {
         service = new FrequencyService()
     }
 
-    void 'test frequency conversion'() {
+    void 'test frequency conversion from #from to #to'() {
         when:
         def converted = service.getConverter(from, to)
 
@@ -29,12 +31,12 @@ class FrequencyServiceSpec extends Specification {
         WEEKLY      | FORTNIGHTLY   | 25        | 50
         DAILY       | WEEKLY        | 1         | 7
         DAILY       | DAILY         | 1         | 1
-        MONTHLY     | DAILY         | 30.4167   | 1
+        MONTHLY     | DAILY         | 50        | 1.6438356164
         DAILY       | ANNUALLY      | 1         | 365
         MONTHLY     | ANNUALLY      | 1         | 12
-        ANNUALLY    | WEEKLY        | 52.1429   | 1
-        WEEKLY      | MONTHLY       | 470       | 2042.2628
-        MONTHLY     | FORTNIGHTLY   | 300       | 138.0821312517
-        MONTHLY     | WEEKLY        | 300       | 69.0410656258
+        ANNUALLY    | WEEKLY        | 53        | 1.0164383565
+        WEEKLY      | MONTHLY       | 470       | 2042.2619047632
+        MONTHLY     | FORTNIGHTLY   | 300       | 138.0821917804
+        MONTHLY     | WEEKLY        | 300       | 69.0410958902
     }
 }
