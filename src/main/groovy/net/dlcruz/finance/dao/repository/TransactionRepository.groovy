@@ -18,9 +18,9 @@ interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     Page<Transaction> findAllByAccountOrderByDateDescIdDesc(Account account, Pageable pageable)
 
-    @Query('select min(t.date) from Transaction t where t.account = :account')
-    Timestamp getFirstTransactionDate(@Param('account') Account account)
+    @Query('select min(t.date) from Transaction t where t.account = :account and t.date <= :date')
+    Timestamp getFirstTransactionDateBefore(@Param('account') Account account, @Param('date') Date date)
 
-    @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account')
-    Timestamp getLastTransactionDate(@Param('account') Account account)
+    @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account and t.date <= :date')
+    Timestamp getLastTransactionDateUpTo(@Param('account') Account account, @Param('date') Date date)
 }

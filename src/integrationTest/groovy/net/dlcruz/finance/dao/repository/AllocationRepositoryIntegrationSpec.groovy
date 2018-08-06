@@ -58,29 +58,6 @@ class AllocationRepositoryIntegrationSpec extends BaseIntegrationSpec {
         repository.getTransactionTotal(transaction) == 300
     }
 
-    void 'should be able to find allocation from a specific date'() {
-        given:
-        def date = new DateTime() - Period.parse(ago)
-        def account = testDataService.newAccountBuilder().entity
-
-        and:
-        testDataService.newTransactionBuilder(account).setDate(date.toDate().clearTime())
-                .newAllocation().setName('Included Transaction 1').build().transactionBuilder.
-        accountBuilder.newTransactionBuilder().setDate(date.plusDays(1).toDate().clearTime())
-                .newAllocation().setName('Included Transaction 2').build().transactionBuilder.
-        accountBuilder.newTransactionBuilder().setDate(date.minusDays(1).toDate().clearTime())
-                .newAllocation().setName('Not Included Transaction').build()
-
-        when:
-        def result = repository.findAllByAccountAndDateGreaterThanOrEqualTo(account, date.toDate().clearTime())
-
-        then:
-        result.name == ['Included Transaction 1', 'Included Transaction 2']
-
-        where:
-        ago << ['P1D', 'P1W', 'P1M', 'P1Y']
-    }
-
     void cleanup() {
         cleanupAccounts()
     }

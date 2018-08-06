@@ -22,8 +22,8 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
     @Query('select a from Allocation a join a.transaction t where t.account = :account')
     List<Allocation> findAllByAccount(@Param('account') Account account)
 
-    @Query('select a from Allocation a join a.transaction t where t.account = :account and t.date >= :date')
-    List<Allocation> findAllByAccountAndDateGreaterThanOrEqualTo(@Param('account') Account account, @Param('date') Date date)
+    @Query('select a from Allocation a join a.transaction t where t.account = :account and t.date >= :from and t.date <= :to')
+    List<Allocation> findAllAccountAllocationBetween(@Param('account') Account account, @Param('from') Date from, @Param('to') Date to)
 
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account')
     BigDecimal getAccountBalance(@Param('account') Account account)
@@ -31,24 +31,27 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
     BigDecimal getAllocationBalance(@Param('account') Account account, @Param('name') String name)
 
-    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.amount < 0')
-    BigDecimal getOverallDebit(@Param('account') Account account)
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.amount < 0 and t.date <= :date')
+    BigDecimal getOverallDebitUpTo(@Param('account') Account account, @Param('date') date)
 
-    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and a.amount < 0')
-    BigDecimal getOverallDebit(@Param('account') Account account, @Param('name') String name)
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and a.amount < 0 and t.date <= :date')
+    BigDecimal getOverallDebitUpTo(@Param('account') Account account, @Param('date') date, @Param('name') String name)
 
-    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.amount > 0')
-    BigDecimal getOverallCredit(@Param('account') Account account)
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.amount > 0 and t.date <= :date')
+    BigDecimal getOverallCredit(@Param('account') Account account, @Param('date') date)
 
-    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and a.amount > 0')
-    BigDecimal getOverallCredit(@Param('account') Account account, @Param('name') String name)
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and a.amount > 0 and t.date <= :date')
+    BigDecimal getOverallCredit(@Param('account') Account account, @Param('date') date, @Param('name') String name)
 
-    @Query('select min(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
-    Timestamp getFirstTransactionDate(@Param('account') Account account, @Param('name') String name)
+    @Query('select min(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name and t.date <= :date')
+    Timestamp getFirstTransactionDateBefore(@Param('account') Account account, @Param('date') Date date, @Param('name') String name)
 
-    @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name')
-    Timestamp getLastTransactionDate(@Param('account') Account account, @Param('name') String name)
+    @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name and t.date <= :date')
+    Timestamp getLastTransactionDateUpTo(@Param('account') Account account, @Param('date') Date date, @Param('name') String name)
 
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t = :transaction')
     BigDecimal getTransactionTotal(@Param('transaction') Transaction transaction)
+
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.date <= :date')
+    BigDecimal getBalanceUpTo(Date date)
 }

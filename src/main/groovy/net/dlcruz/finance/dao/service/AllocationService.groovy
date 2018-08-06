@@ -12,27 +12,29 @@ interface AllocationService extends EntityService<Allocation, Long> {
 
     List<Allocation> findAllByAccount(Account account)
 
-    List<Allocation> findAllByAccountStartingFrom(Account account, Date date)
+    List<Allocation> findAllByAccountBetween(Account account, Date from, Date to)
 
     BigDecimal getAccountBalance(Account account)
 
     BigDecimal getAllocationBalance(Account account, String name)
 
-    BigDecimal getOverallDebit(Account account)
+    BigDecimal getOverallDebitUpTo(Account account, Date date)
 
-    BigDecimal getOverallDebit(Account account, String name)
+    BigDecimal getOverallDebitUpTo(Account account, Date date, String name)
 
-    BigDecimal getOverallCredit(Account account)
+    BigDecimal getOverallCreditUpTo(Account account, Date date)
 
-    BigDecimal getOverallCredit(Account account, String name)
+    BigDecimal getOverallCreditUpTo(Account account, Date date, String name)
 
-    Date getFirstTransactionDate(Account account, String name)
+    Date getFirstTransactionDateBefore(Account account, Date date, String name)
 
-    Date getlastTransactionDate(Account account, String name)
+    Date getlastTransactionDateUpTo(Account account, Date date, String name)
 
     List<Allocation> findAllByTransaction(Transaction transaction)
 
     BigDecimal getTransactionTotal(Transaction transaction)
 
     BigDecimal sum(List<Allocation> allocations)
+
+    BigDecimal getBalanceUpTo(Date date)
 }

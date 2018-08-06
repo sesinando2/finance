@@ -12,7 +12,7 @@ interface TransactionService extends EntityService<Transaction, Long> {
 
     Page<Transaction> findAllByAccount(Account account, Pageable pageable)
 
-    Date getFirstTransactionDate(Account account)
+    Date getFirstTransactionDateBefore(Account account, Date date)
 
-    Date getLastTransactionDate(Account account)
+    Date getLastTransactionDateUpTo(Account account, Date date)
 }

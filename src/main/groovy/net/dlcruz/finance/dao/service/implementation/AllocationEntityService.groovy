@@ -1,14 +1,13 @@
 package net.dlcruz.finance.dao.service.implementation
 
-import groovy.time.TimeCategory
 import net.dlcruz.finance.api.exception.ObjectValidationException
 import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Allocation
 import net.dlcruz.finance.dao.domain.Budget
 import net.dlcruz.finance.dao.domain.Transaction
 import net.dlcruz.finance.dao.repository.AllocationRepository
-import net.dlcruz.finance.dao.service.base.BaseEntityService
 import net.dlcruz.finance.dao.service.AllocationService
+import net.dlcruz.finance.dao.service.base.BaseEntityService
 import net.dlcruz.finance.service.MessageResolver
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.repository.JpaRepository
@@ -44,8 +43,8 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     }
 
     @Override
-    List<Allocation> findAllByAccountStartingFrom(Account account, Date date) {
-        repository.findAllByAccountAndDateGreaterThanOrEqualTo(account, date)
+    List<Allocation> findAllByAccountBetween(Account account, Date from, Date to) {
+        repository.findAllAccountAllocationBetween(account, from, to)
     }
 
     @Override
@@ -69,33 +68,33 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     }
 
     @Override
-    BigDecimal getOverallDebit(Account account) {
-        repository.getOverallDebit(account) ?: 0
+    BigDecimal getOverallDebitUpTo(Account account, Date date) {
+        repository.getOverallDebitUpTo(account, date) ?: 0
     }
 
     @Override
-    BigDecimal getOverallDebit(Account account, String name) {
-        repository.getOverallDebit(account, name) ?: 0
+    BigDecimal getOverallDebitUpTo(Account account, Date date, String name) {
+        repository.getOverallDebitUpTo(account, date, name) ?: 0
     }
 
     @Override
-    BigDecimal getOverallCredit(Account account) {
-        repository.getOverallCredit(account) ?: 0
+    BigDecimal getOverallCreditUpTo(Account account, Date date) {
+        repository.getOverallCredit(account, date) ?: 0
     }
 
     @Override
-    BigDecimal getOverallCredit(Account account, String name) {
-        repository.getOverallCredit(account, name) ?: 0
+    BigDecimal getOverallCreditUpTo(Account account, Date date, String name) {
+        repository.getOverallCredit(account, date, name) ?: 0
     }
 
     @Override
-    Date getFirstTransactionDate(Account account, String name) {
-        repository.getFirstTransactionDate(account, name)?.toCalendar()?.time ?: TimeCategory.getDay(1).ago
+    Date getFirstTransactionDateBefore(Account account, Date date, String name) {
+        repository.getFirstTransactionDateBefore(account, date, name)?.toCalendar()?.time ?: date
     }
 
     @Override
-    Date getlastTransactionDate(Account account, String name) {
-        repository.getLastTransactionDate(account, name)?.toCalendar()?.time ?: new Date()
+    Date getlastTransactionDateUpTo(Account account, Date date, String name) {
+        repository.getLastTransactionDateUpTo(account, date, name)?.toCalendar()?.time ?: date
     }
 
     @Override
@@ -106,6 +105,11 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     @Override
     BigDecimal sum(List<Allocation> allocations) {
         allocations.sum { Allocation allocation -> allocation.amount } ?: 0
+    }
+
+    @Override
+    BigDecimal getBalanceUpTo(Date date) {
+        repository.getBalanceUpTo(date)
     }
 
     private void validateUniqueAllocationForTransaction(Allocation allocation, ObjectValidationException validationException) {

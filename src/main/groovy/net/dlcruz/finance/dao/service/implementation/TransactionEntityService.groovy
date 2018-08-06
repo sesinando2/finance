@@ -1,5 +1,6 @@
 package net.dlcruz.finance.dao.service.implementation
 
+import groovy.time.TimeCategory
 import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Transaction
 import net.dlcruz.finance.dao.repository.TransactionRepository
@@ -37,12 +38,12 @@ class TransactionEntityService extends BaseEntityService<Transaction, Long> impl
     }
 
     @Override
-    Date getFirstTransactionDate(Account account) {
-        repository.getFirstTransactionDate(account).toCalendar().time
+    Date getFirstTransactionDateBefore(Account account, Date date) {
+        repository.getFirstTransactionDateBefore(account, date)?.toCalendar()?.time ?: date
     }
 
     @Override
-    Date getLastTransactionDate(Account account) {
-        repository.getLastTransactionDate(account).toCalendar().time
+    Date getLastTransactionDateUpTo(Account account, Date date) {
+        repository.getLastTransactionDateUpTo(account, date)?.toCalendar()?.time ?: date
     }
 }
