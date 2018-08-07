@@ -47,14 +47,15 @@ class BreakdownEntityService implements BreakdownService {
     }
 
     @Override
-    List<Breakdown> getTrendsFrom(Frequency frequency, Account account = null, int ago = 5) {
+    List<Breakdown> getTrendsFrom(Frequency frequency, Account account = null, int ago = 12) {
         def accounts = account ? [account] : accountService.list()
         (ago..1).collect {
             def startDate = frequencyService.getStartDateForBreakdown(frequency, it)
             def roundedDownStartDate = frequencyService.getRoundedDownStartDate(startDate, frequency)
             def roundedUpEndDate = frequencyService.getRoundedUpEndDate(startDate, frequency)
-            def label = "${roundedDownStartDate.format('d MMM')} - ${roundedUpEndDate.format('d MMM')}"
-            getTotalBreakdownFor(frequency, roundedDownStartDate, roundedUpEndDate, accounts, label)
+            getTotalBreakdownFor(frequency, roundedDownStartDate, roundedUpEndDate, accounts, "${roundedUpEndDate.time}")
+        }.findAll {
+            it.balance > 0 || it.totalDebit > 0 || it.totalCredit > 0 || it.expenseRate > 0 || it.incomeRate > 0
         }
     }
 
