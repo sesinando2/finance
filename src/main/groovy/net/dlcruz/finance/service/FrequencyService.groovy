@@ -126,10 +126,14 @@ class FrequencyService {
     }
 
     Date getRoundedUpEndDate(Date date, Frequency frequency) {
-        def calendar = date.clearTime().toCalendar()
+        def calendar = date.toCalendar()
         getCalendarField(frequency)?.with {
             calendar.set(it, calendar.getActualMaximum(it))
         }
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY))
+        calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE))
+        calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND))
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND))
         calendar.time
     }
 
