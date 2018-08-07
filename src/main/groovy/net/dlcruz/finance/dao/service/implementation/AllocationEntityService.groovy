@@ -108,8 +108,13 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     }
 
     @Override
-    BigDecimal getBalanceUpTo(Date date) {
-        repository.getBalanceUpTo(date)
+    BigDecimal getAccountBalanceUpTo(Account account, Date date) {
+        repository.getAccountBalanceUpTo(account, date) ?: 0
+    }
+
+    @Override
+    BigDecimal getAccountAllocationBalanceUpTo(Account account, Date date, String name) {
+        repository.getAccountAllocationBalanceUpTo(account, date, name) ?: 0
     }
 
     private void validateUniqueAllocationForTransaction(Allocation allocation, ObjectValidationException validationException) {

@@ -36,5 +36,7 @@ interface AllocationService extends EntityService<Allocation, Long> {
 
     BigDecimal sum(List<Allocation> allocations)
 
-    BigDecimal getBalanceUpTo(Date date)
+    BigDecimal getAccountBalanceUpTo(Account account, Date date)
+
+    BigDecimal getAccountAllocationBalanceUpTo(Account account, Date date, String name)
 }

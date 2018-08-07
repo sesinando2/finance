@@ -17,7 +17,7 @@ class GoalAmountCalculatorService {
             return remainingAmount
         }
 
-        def roundedTargetDate = frequencyService.getRoundedUpEndDate(targetDate, frequency)
+        def roundedTargetDate = frequencyService.getRoundedUpEndDate(targetDate, frequency) + 1
         def result = frequencyService.getDuration(now, roundedTargetDate, frequency)
         result > 0 ? remainingAmount / result : remainingAmount
     }

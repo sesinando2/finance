@@ -52,6 +52,9 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t = :transaction')
     BigDecimal getTransactionTotal(@Param('transaction') Transaction transaction)
 
-    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.date <= :date')
-    BigDecimal getBalanceUpTo(Date date)
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and t.date <= :date')
+    BigDecimal getAccountBalanceUpTo(@Param('account') Account account, @Param('date') Date date)
+
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and t.date <= :date and a.name = :name')
+    BigDecimal getAccountAllocationBalanceUpTo(@Param('account') Account account, @Param('date') Date date, @Param('name') String name)
 }

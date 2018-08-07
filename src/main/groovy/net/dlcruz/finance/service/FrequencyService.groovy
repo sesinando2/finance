@@ -130,7 +130,6 @@ class FrequencyService {
         getCalendarField(frequency)?.with {
             calendar.set(it, calendar.getActualMaximum(it))
         }
-        calendar.add(Calendar.DAY_OF_YEAR, 1)
         calendar.time
     }
 
