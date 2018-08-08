@@ -3,7 +3,6 @@ package net.dlcruz.finance.dao.service.implementation
 import net.dlcruz.finance.api.exception.ObjectValidationException
 import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Allocation
-import net.dlcruz.finance.dao.domain.Budget
 import net.dlcruz.finance.dao.domain.Transaction
 import net.dlcruz.finance.dao.repository.AllocationRepository
 import net.dlcruz.finance.dao.service.AllocationService
@@ -58,21 +57,6 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     }
 
     @Override
-    BigDecimal getBudgetBalance(Budget budget) {
-        repository.getAllocationBalance(budget.account, budget.name)
-    }
-
-    @Override
-    BigDecimal getAccountBalance(Account account) {
-        repository.getAccountBalance(account)
-    }
-
-    @Override
-    BigDecimal getAllocationBalance(Account account, String name) {
-        repository.getAllocationBalance(account, name)
-    }
-
-    @Override
     BigDecimal getOverallDebitUpTo(Account account, Date date) {
         repository.getOverallDebitUpTo(account, date) ?: 0
     }
@@ -100,11 +84,6 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     @Override
     Date getlastTransactionDateUpTo(Account account, Date date, String name) {
         repository.getLastTransactionDateUpTo(account, date, name)?.toCalendar()?.time ?: date
-    }
-
-    @Override
-    BigDecimal getTransactionTotal(Transaction transaction) {
-        repository.getTransactionTotal(transaction)
     }
 
     @Override

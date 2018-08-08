@@ -42,11 +42,6 @@ class BreakdownEntityService implements BreakdownService {
     }
 
     @Override
-    List<Breakdown> getTrendsFrom(Frequency frequency, int ago) {
-        getTrendsFrom(frequency, null, ago)
-    }
-
-    @Override
     List<Breakdown> getTrendsFrom(Frequency frequency, Account account = null, int ago = 12) {
         def accounts = account ? [account] : accountService.list()
         (ago..1).collect {

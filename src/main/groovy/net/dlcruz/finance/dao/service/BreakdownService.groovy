@@ -16,9 +16,5 @@ interface BreakdownService {
 
     List<Breakdown> getTrendsFrom(Frequency frequency)
 
-    List<Breakdown> getTrendsFrom(Frequency frequency, Account account)
-
-    List<Breakdown> getTrendsFrom(Frequency frequency, int ago)
-
     List<Breakdown> getTrendsFrom(Frequency frequency, Account account, int ago)
 }
