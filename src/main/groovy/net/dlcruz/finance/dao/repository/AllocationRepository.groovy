@@ -22,6 +22,9 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
     @Query('select a from Allocation a join a.transaction t where t.account = :account')
     List<Allocation> findAllByAccount(@Param('account') Account account)
 
+    @Query('select distinct(a.name) from Allocation a join a.transaction t where t.account = :account')
+    List<String> findAllNamesByAccount(@Param('account') Account account)
+
     @Query('select a from Allocation a join a.transaction t where t.account = :account and t.date >= :from and t.date <= :to')
     List<Allocation> findAllAccountAllocationBetween(@Param('account') Account account, @Param('from') Date from, @Param('to') Date to)
 
@@ -57,4 +60,10 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
 
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and t.date <= :date and a.name = :name')
     BigDecimal getAccountAllocationBalanceUpTo(@Param('account') Account account, @Param('date') Date date, @Param('name') String name)
+
+    @Query('select sum(a.amount * -1) from Allocation a join a.transaction t where t.account = :account and a.name = :name and t.date >= :from and t.date <= :to and a.amount < 0')
+    BigDecimal getAccountAllocationTotalDebit(@Param('account') Account account, @Param('name') String name, @Param('from') Date date, @Param('to') Date to)
+
+    @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and t.date >= :from and t.date <= :to and a.amount >= 0')
+    BigDecimal getAccountAllocationTotalCredit(@Param('account') Account account, @Param('name') String name, @Param('from') Date date, @Param('to') Date to)
 }

@@ -43,6 +43,11 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     }
 
     @Override
+    List<String> findAllNamesByAccount(Account account) {
+        repository.findAllNamesByAccount(account)
+    }
+
+    @Override
     List<Allocation> findAllByAccountBetween(Account account, Date from, Date to) {
         repository.findAllAccountAllocationBetween(account, from, to)
     }
@@ -115,6 +120,16 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     @Override
     BigDecimal getAccountAllocationBalanceUpTo(Account account, Date date, String name) {
         repository.getAccountAllocationBalanceUpTo(account, date, name) ?: 0
+    }
+
+    @Override
+    BigDecimal getAccountAllocationOverAllDebitBetween(Account account, String name, Date from, Date to) {
+        repository.getAccountAllocationTotalDebit(account, name, from, to) ?: 0
+    }
+
+    @Override
+    BigDecimal getAccountAllocationOverAllCreditBetween(Account account, String name, Date from, Date to) {
+        repository.getAccountAllocationTotalCredit(account, name, from, to) ?: 0
     }
 
     private void validateUniqueAllocationForTransaction(Allocation allocation, ObjectValidationException validationException) {

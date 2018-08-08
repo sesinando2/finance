@@ -85,15 +85,14 @@ class BreakdownEntityService implements BreakdownService {
 
     private List<Breakdown> getBreakdownBy(Frequency frequency, Date startingDate, Date endingDate, Account account) {
         def accountBudgets = budgetService.findAllByAccount(account)
-        def accountAllocations = allocationService.findAllByAccountBetween(account, startingDate, endingDate)
+        def allocationNames = allocationService.findAllNamesByAccount(account)
 
-        accountAllocations.groupBy { it.name }
-                .collect(this.&createBreakdown.curry(frequency, account, accountBudgets, endingDate))
+        allocationNames
+                .collect(this.&createBreakdown.curry(frequency, account, accountBudgets, startingDate, endingDate))
                 .collect(this.&setAllocationRates.curry(frequency, account, endingDate))
     }
 
-    private Breakdown createBreakdown(Frequency frequency, Account account, List<Budget> accountBudgets, Date endingDate, String name, List<Allocation> allocations) {
-
+    private Breakdown createBreakdown(Frequency frequency, Account account, List<Budget> accountBudgets, Date startingDate, Date endingDate, String name) {
         def budget = accountBudgets.find { it.name == name }
 
         new Breakdown(
@@ -101,8 +100,8 @@ class BreakdownEntityService implements BreakdownService {
             budget: budget,
             label: name,
             balance: allocationService.getAccountAllocationBalanceUpTo(account, endingDate, name),
-            totalDebit: calculateTotalDebit(allocations),
-            totalCredit: calculateTotalCredit(allocations),
+            totalDebit: allocationService.getAccountAllocationOverAllDebitBetween(account, name, startingDate, endingDate),
+            totalCredit: allocationService.getAccountAllocationOverAllCreditBetween(account, name, startingDate, endingDate),
             allocatedAmount: getAllocatedAmount(budget, frequency)
         )
     }
