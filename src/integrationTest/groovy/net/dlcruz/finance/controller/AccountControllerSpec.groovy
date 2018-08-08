@@ -130,7 +130,7 @@ class AccountControllerSpec extends BaseControllerSpec {
 
         then:
         response.statusCode == HttpStatus.OK
-        response.body.amount == 1000
+        response.body.amount == 833.3333333333
 
         cleanup:
         goal = response.body
