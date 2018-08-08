@@ -15,7 +15,7 @@ class GoalAmountCalculatorServiceSpec extends Specification {
     GoalAmountCalculatorService service
 
     void setup() {
-        service = new GoalAmountCalculatorService()
+        service = new GoalAmountCalculatorService(frequencyService: new FrequencyService())
     }
 
     void 'should be able to correctly calculate how much to allocate #frequency with period of #period and target of #targetAmount'() {
@@ -28,10 +28,10 @@ class GoalAmountCalculatorServiceSpec extends Specification {
 
         where:
         frequency   | period    | targetAmount   | expected
-        DAILY       | 'P10D'    | 1000           | 100
-        WEEKLY      | 'P5W'     | 500            | 100
-        MONTHLY     | 'P8M'     | 8000           | 1000
-        MONTHLY     | 'P6M'     | 60             | 10
-        ANNUALLY    | 'P5Y'     | 50000          | 10000
+        DAILY       | 'P10D'    | 1000           | 90.9090909091
+        WEEKLY      | 'P5W'     | 500            | 83.3333333333
+        MONTHLY     | 'P8M'     | 8000           | 888.8888888889
+        MONTHLY     | 'P6M'     | 60             | 8.5714285714
+        ANNUALLY    | 'P5Y'     | 50000          | 8333.3333333333
     }
 }
