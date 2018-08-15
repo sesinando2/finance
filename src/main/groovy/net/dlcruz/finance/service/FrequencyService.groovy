@@ -83,31 +83,32 @@ class FrequencyService {
         calendar.time
     }
 
-    Date getEndDateForBreakdown(Frequency frequency, int ago = 1) {
-        Calendar calendar = Calendar.instance
+    Date getEndDateForBreakdown(Frequency frequency, Date startDate) {
+        Calendar calendar = startDate.toCalendar()
 
         switch (frequency) {
             case Frequency.DAILY:
-                calendar.add(Calendar.DAY_OF_YEAR, (-1 * ago) + 1)
+                calendar.add(Calendar.DAY_OF_YEAR,1)
                 break
 
             case Frequency.WEEKLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, (-1 * ago) + 1)
+                calendar.add(Calendar.WEEK_OF_YEAR, 1)
                 break
 
             case Frequency.FORTNIGHTLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, (-2 * ago) + 1)
+                calendar.add(Calendar.WEEK_OF_YEAR, 2)
                 break
 
             case Frequency.MONTHLY:
-                calendar.add(Calendar.MONTH, (-1 * ago) + 1)
+                calendar.add(Calendar.MONTH, 1)
                 break
 
             case Frequency.ANNUALLY:
-                calendar.add(Calendar.YEAR, (-1 * ago) + 1)
+                calendar.add(Calendar.YEAR, 1)
                 break
         }
 
+        calendar.add(Calendar.DAY_OF_YEAR, -1)
         calendar.time
     }
 

@@ -47,8 +47,8 @@ class BreakdownEntityService implements BreakdownService {
         (ago..1).collect {
             def startDate = frequencyService.getStartDateForBreakdown(frequency, it)
             def roundedDownStartDate = frequencyService.getRoundedDownStartDate(startDate, frequency)
-            def roundedUpEndDate = frequencyService.getRoundedUpEndDate(startDate, frequency)
-            getTotalBreakdownFor(frequency, roundedDownStartDate, roundedUpEndDate, accounts, "${roundedUpEndDate.time}")
+            def endDate = frequencyService.getEndDateForBreakdown(frequency, roundedDownStartDate)
+            getTotalBreakdownFor(frequency, roundedDownStartDate, endDate, accounts, "${endDate.time}")
         }
     }
 
