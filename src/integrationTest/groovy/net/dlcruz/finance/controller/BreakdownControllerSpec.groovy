@@ -17,7 +17,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
 
     void 'should return all accounts breakdown'() {
         given:
-        testDataService.newAccountBuilder().setName('Test Account 1').build().
+        testDataService.newAccountBuilder().setName('Test Breakdown Account 1').build().
                 newBudgetBuilder().setName('Test Budget 1').setAmount(100).setFrequency(WEEKLY).build().
                 accountBuilder.newTransactionBuilder().
                     newAllocation().setName('Test Budget 1').setAmount(100).transactionBuilder.
@@ -26,7 +26,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
 
 
         and:
-        testDataService.newAccountBuilder().setName('Test Account 2').build().
+        testDataService.newAccountBuilder().setName('Test Breakdown Account 2').build().
                 newBudgetBuilder().setName('Test Budget 2').setAmount(200).setFrequency(WEEKLY).build().
                 accountBuilder.
                 newTransactionBuilder().newAllocation().setName('Test Budget 2').setAmount(200).transactionBuilder.build().
@@ -54,7 +54,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
         def budget3 = breakdownList.find { it.label == 'Test Budget 3' }
 
         then:
-        budget1.account.name == 'Test Account 1'
+        budget1.account.name == 'Test Breakdown Account 1'
         budget1.budget.name == 'Test Budget 1'
         budget1.balance == 100
         budget1.totalCredit == 100
@@ -62,7 +62,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
         budget1.allocatedAmount == 100
 
         and:
-        budget2.account.name == 'Test Account 2'
+        budget2.account.name == 'Test Breakdown Account 2'
         budget2.budget.name == 'Test Budget 2'
         budget2.balance == 175
         budget2.totalCredit == 250
@@ -70,7 +70,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
         budget2.allocatedAmount == 200
 
         and:
-        budget3.account.name == 'Test Account 1'
+        budget3.account.name == 'Test Breakdown Account 1'
         budget3.budget == null
         budget3.balance == 200
         budget3.totalCredit == 200
