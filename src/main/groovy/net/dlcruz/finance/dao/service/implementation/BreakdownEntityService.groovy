@@ -112,7 +112,9 @@ class BreakdownEntityService implements BreakdownService {
     }
 
     private Breakdown setRates(Frequency frequency, BigDecimal credit, BigDecimal debit, Date first, Date last, Breakdown breakdown) {
-        def duration = frequencyService.getDuration(first, last, frequency)
+        def startDate = frequencyService.getRoundedDownStartDate(first, frequency)
+        def endDate = frequencyService.getRoundedUpEndDate(last, frequency) + 1
+        def duration = frequencyService.getDuration(startDate, endDate, frequency)
         def divisor = [1, duration].max()
         breakdown.incomeRate = credit / divisor
         breakdown.expenseRate = debit / divisor
