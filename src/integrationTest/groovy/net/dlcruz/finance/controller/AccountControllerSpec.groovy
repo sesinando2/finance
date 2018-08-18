@@ -42,7 +42,7 @@ class AccountControllerSpec extends BaseControllerSpec {
     void 'when creating an account, should not allow user to explicitly set the account owner'() {
         when:
         def response = restTemplate.postForEntity('/account',
-                new Account(name: "Test Account ${System.currentTimeMillis()}", owner: 'set_owner'), Account)
+                new Account(name: "Test AccountControllerSpec ${System.currentTimeMillis()}", owner: 'set_owner'), Account)
 
         and:
         account = accountService.get(response.body.id)
