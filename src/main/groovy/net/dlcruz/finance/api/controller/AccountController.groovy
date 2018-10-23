@@ -1,6 +1,7 @@
 package net.dlcruz.finance.api.controller
 
 import net.dlcruz.finance.api.controller.base.BaseEntityController
+import net.dlcruz.finance.api.model.Breakdown
 import net.dlcruz.finance.dao.domain.*
 import net.dlcruz.finance.dao.service.*
 import net.dlcruz.finance.dao.service.base.EntityService

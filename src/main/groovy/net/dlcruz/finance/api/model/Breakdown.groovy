@@ -1,4 +1,7 @@
-package net.dlcruz.finance.dao.domain
+package net.dlcruz.finance.api.model
+
+import net.dlcruz.finance.dao.domain.Account
+import net.dlcruz.finance.dao.domain.Budget
 
 class Breakdown {
 

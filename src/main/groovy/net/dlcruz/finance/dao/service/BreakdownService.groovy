@@ -1,7 +1,7 @@
 package net.dlcruz.finance.dao.service
 
 import net.dlcruz.finance.dao.domain.Account
-import net.dlcruz.finance.dao.domain.Breakdown
+import net.dlcruz.finance.api.model.Breakdown
 import net.dlcruz.finance.dao.domain.Frequency
 
 interface BreakdownService {
