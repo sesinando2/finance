@@ -1,14 +1,13 @@
-package net.dlcruz.finance.dao.service.implementation
+package net.dlcruz.finance.service
 
 import net.dlcruz.finance.api.model.Breakdown
 import net.dlcruz.finance.dao.domain.*
 import net.dlcruz.finance.dao.service.*
-import net.dlcruz.finance.service.FrequencyService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class BreakdownEntityService implements BreakdownService {
+class BreakdownService {
 
     @Autowired
     BudgetService budgetService
@@ -25,7 +24,6 @@ class BreakdownEntityService implements BreakdownService {
     @Autowired
     FrequencyService frequencyService
 
-    @Override
     Breakdown getTotalBreakdown(Frequency frequency, Account account = null) {
         def accounts = account ? [account] : accountService.list()
         def label = account ? account.name : 'All Accounts'
@@ -33,14 +31,12 @@ class BreakdownEntityService implements BreakdownService {
         getTotalBreakdownFor(frequency, start,  new Date(), accounts, label)
     }
 
-    @Override
     List<Breakdown> getBreakdown(Frequency frequency, Account account = null) {
         def accounts = account ? [account] : accountService.list()
         def start = frequencyService.getStartDateForBreakdown(frequency)
         accounts.collectMany(this.&getBreakdownBy.curry(frequency, start, new Date()))
     }
 
-    @Override
     List<Breakdown> getTrendsFrom(Frequency frequency, Account account = null, int ago = 12) {
         def accounts = account ? [account] : accountService.list()
         (ago..1).collect {

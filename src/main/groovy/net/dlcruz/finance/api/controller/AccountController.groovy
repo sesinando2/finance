@@ -5,6 +5,7 @@ import net.dlcruz.finance.api.model.Breakdown
 import net.dlcruz.finance.dao.domain.*
 import net.dlcruz.finance.dao.service.*
 import net.dlcruz.finance.dao.service.base.EntityService
+import net.dlcruz.finance.service.BreakdownService
 import net.dlcruz.finance.service.FrequencyService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Page

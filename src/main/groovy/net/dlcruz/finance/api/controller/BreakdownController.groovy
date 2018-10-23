@@ -2,7 +2,7 @@ package net.dlcruz.finance.api.controller
 
 
 import net.dlcruz.finance.api.model.Breakdown
-import net.dlcruz.finance.dao.service.BreakdownService
+import net.dlcruz.finance.service.BreakdownService
 import net.dlcruz.finance.service.FrequencyService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
