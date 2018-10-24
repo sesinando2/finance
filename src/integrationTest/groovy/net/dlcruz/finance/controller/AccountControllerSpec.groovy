@@ -7,8 +7,6 @@ import net.dlcruz.finance.dao.domain.*
 import net.dlcruz.finance.dao.service.AccountService
 import net.dlcruz.finance.dao.service.AllocationService
 import net.dlcruz.finance.dao.service.TransactionService
-import net.dlcruz.finance.fixture.AllocationBuilder
-import net.dlcruz.finance.fixture.TransactionBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -43,8 +41,7 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'when creating an account, should not allow user to explicitly set the account owner'() {
         when:
-        def response = restTemplate.postForEntity('/account',
-                new Account(name: "Test AccountControllerSpec ${System.currentTimeMillis()}", owner: 'set_owner'), Account)
+        def response = restTemplate.postForEntity('/account', accountBuilder().setOwner('set_owner').build(), Account)
 
         and:
         account = accountService.get(response.body.id)
@@ -76,7 +73,7 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'should be able to create a budget for an account'() {
         given:
-        budget = new Budget(name: 'Test Budget', amount: 500, frequency: Frequency.WEEKLY)
+        budget = budgetBuilder().setName('Test Budget').setAmount(500).setFrequency(Frequency.WEEKLY).build()
 
         when:
         def response = restTemplate.postForEntity('/account/{id}/budget', budget, Budget, account.id)
@@ -200,13 +197,9 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'should be able to get the list of paginated results'() {
         given:
-        def transaction = TransactionBuilder.from(account).persist(transactionService)
-
-        and:
-        AllocationBuilder.from(transaction)
-                .setName('Test Allocation 1')
-                .setAmount(100)
-                .persist(allocationService)
+        def transaction = transactionBuilder().setAccount(account).addAllocation {
+            setName('Test Allocation 1').setAmount(100)
+        }.persist()
 
         when:
         def response = restTemplate.getForEntity("/account/{id}/transaction/page?page=$page&size=$size", Map, account.id)
@@ -235,11 +228,10 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'should be able to calculate the account balance correctly'() {
         given:
-        transaction = TransactionBuilder.from(account).persist(transactionService)
-
-        and:
-        AllocationBuilder.from(transaction).setName('Allocation 1').setAmount(200).persist(allocationService)
-        AllocationBuilder.from(transaction).setName('Allocation 2').setAmount(-300).persist(allocationService)
+        transaction =  transactionBuilder().setAccount(account)
+                .addAllocation { setName('Allocation 1').setAmount(200) }
+                .addAllocation { setName('Allocation 2').setAmount(-300) }
+                .persist()
 
         when:
         def response = restTemplate.getForEntity('/account/{id}', Account, account.id)
@@ -251,10 +243,9 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'should be able to calculate account breakdown'() {
         given:
-        transaction = TransactionBuilder.from(account).setDate(date).persist(transactionService)
-
-        and:
-        AllocationBuilder.from(transaction).setName(budget.name).setAmount(amount).persist(allocationService)
+        transaction = transactionBuilder().setAccount(account).setDate(date)
+                .addAllocation { setName(budget.name).setAmount(amount) }
+                .persist()
 
         when:
         def response = restTemplate.getForEntity("/account/{id}/$frequency-breakdown", List, account.id)
@@ -293,8 +284,5 @@ class AccountControllerSpec extends BaseControllerSpec {
 
         then:
         existingAccount == null
-
-        cleanup:
-        cleanupAccounts()
     }
 }

@@ -2,12 +2,7 @@ package net.dlcruz.finance.controller
 
 import net.dlcruz.finance.config.IntegrationTestConfiguration
 import net.dlcruz.finance.controller.base.BaseControllerSpec
-import net.dlcruz.finance.dao.service.AccountService
-import net.dlcruz.finance.dao.service.BudgetService
-import net.dlcruz.finance.fixture.AccountBuilder
-import net.dlcruz.finance.fixture.AllocationBuilder
-import net.dlcruz.finance.fixture.BudgetBuilder
-import net.dlcruz.finance.fixture.TransactionBuilder
+import net.dlcruz.finance.dao.service.implementation.AccountEntityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -23,37 +18,37 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class BreakdownControllerSpec extends BaseControllerSpec {
 
     @Autowired
-    AccountService accountService
+    AccountEntityService accountService
 
     void 'should return all accounts breakdown'() {
         given:
-        def account = new AccountBuilder().setName('Test Breakdown Account 1').persist(accountService)
-        def budget = BudgetBuilder.from(account).setName('Test Budget 1').setAmount(100).setFrequency(WEEKLY).persist(budgetRepository)
-        def transaction = TransactionBuilder.from(account).persist(transactionRepository)
+        def account = accountBuilder().setName('Test Breakdown Account 1').persist()
+
+        def budget = budgetBuilder().setAccount(account).setName('Test Budget 1').setAmount(100).setFrequency(WEEKLY).persist()
+        transactionBuilder().setAccount(account)
+                .addAllocation { setName(budget.name).setAmount(100) }
+                .addAllocation { setName('Test Budget 3').setAmount(200) }
+                .persist()
 
         and:
-        AllocationBuilder.from(transaction).setName(budget.name).setAmount(100).persist(allocationRepository)
-        AllocationBuilder.from(transaction).setName('Test Budget 3').setAmount(200).persist(allocationRepository)
+        def anotherAccount = accountBuilder().setName('Test Breakdown Account 2').persist()
+        def anotherBudget = budgetBuilder().setAccount(anotherAccount).setName('Test Budget 2').setAmount(200).setFrequency(WEEKLY).persist()
 
         and:
-        def anotherAccount = new AccountBuilder().setName('Test Breakdown Account 2').persist(accountService)
-        def anotherBudget = BudgetBuilder.from(anotherAccount).setName('Test Budget 2').setAmount(200).setFrequency(WEEKLY).persist(budgetRepository)
-
-        and:
-        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(200).persist(allocationRepository)
+        transactionBuilder().setAccount(anotherAccount).addAllocation {
+            setName(anotherBudget.name).setAmount(200)
         }
 
-        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(-50).persist(allocationRepository)
+        transactionBuilder().setAccount(anotherAccount).addAllocation {
+            setName(anotherBudget.name).setAmount(-50)
         }
 
-        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(-25).persist(allocationRepository)
+        transactionBuilder().setAccount(anotherAccount).addAllocation {
+            setName(anotherBudget.name).setAmount(-25)
         }
 
-        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(50).persist(allocationRepository)
+        transactionBuilder().setAccount(anotherAccount).addAllocation {
+            setName(anotherBudget.name).setAmount(50)
         }
 
         when:
@@ -95,8 +90,9 @@ class BreakdownControllerSpec extends BaseControllerSpec {
         budget3.totalCredit == 200
         budget3.totalDebit == 0
         budget3.allocatedAmount == 0
-
-        cleanup:
-        cleanupAccounts()
+    }
+    @Override
+    protected String getAuthenticatedUser() {
+        'another_user'
     }
 }

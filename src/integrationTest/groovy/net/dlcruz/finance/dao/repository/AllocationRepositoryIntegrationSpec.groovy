@@ -3,9 +3,6 @@ package net.dlcruz.finance.dao.repository
 import net.dlcruz.finance.config.IntegrationTestConfiguration
 import net.dlcruz.finance.controller.base.BaseIntegrationSpec
 import net.dlcruz.finance.dao.service.AccountService
-import net.dlcruz.finance.fixture.AccountBuilder
-import net.dlcruz.finance.fixture.AllocationBuilder
-import net.dlcruz.finance.fixture.TransactionBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -22,21 +19,20 @@ class AllocationRepositoryIntegrationSpec extends BaseIntegrationSpec {
 
     void 'should be able to find all allocations by account'() {
         given:
-        def account1 = new AccountBuilder().persist(accountService)
-        def transaction = TransactionBuilder.from(account1).persist(transactionRepository)
-        AllocationBuilder.from(transaction).setName('Test Transaction 111').setAmount(100).persist(allocationRepository)
-        AllocationBuilder.from(transaction).setName('Test Transaction 112').setAmount(200).persist(allocationRepository)
+        def account1 = accountBuilder().persist()
+        def transaction = transactionBuilder().setAccount(account1)
+                .addAllocation { setName('Test Transaction 111').setAmount(100) }
+                .addAllocation { setName('Test Transaction 112').setAmount(200) }
+                .persist()
 
-        TransactionBuilder.from(account1).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName('Test Transaction 121').setAmount(300).persist(allocationRepository)
-            AllocationBuilder.from(it).setName('Test Transaction 112').setAmount(400).persist(allocationRepository)
-        }
+        transactionBuilder().setAccount(account1)
+                .addAllocation { setName('Test Transaction 121').setAmount(300) }
+                .addAllocation { setName('Test Transaction 112').setAmount(400) }
 
         and:
-        def account2 = new AccountBuilder().persist(accountService)
-        TransactionBuilder.from(account2).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName('Test Transaction 211').setAmount(500).persist(allocationRepository)
-        }
+        def account2 = accountBuilder().addTransaction {
+            addAllocation { setName('Test Transaction 211').setAmount(500) }
+        }.persist()
 
         when:
         def result = repository.findAllByAccount(account1)
@@ -59,9 +55,5 @@ class AllocationRepositoryIntegrationSpec extends BaseIntegrationSpec {
 
         and:
         repository.getTransactionTotal(transaction) == 300
-    }
-
-    void cleanup() {
-        cleanupAccounts()
     }
 }

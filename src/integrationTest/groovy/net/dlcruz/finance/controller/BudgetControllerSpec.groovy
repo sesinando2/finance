@@ -6,10 +6,6 @@ import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Budget
 import net.dlcruz.finance.dao.service.AccountService
 import net.dlcruz.finance.dao.service.BudgetService
-import net.dlcruz.finance.fixture.AccountBuilder
-import net.dlcruz.finance.fixture.AllocationBuilder
-import net.dlcruz.finance.fixture.BudgetBuilder
-import net.dlcruz.finance.fixture.TransactionBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -35,7 +31,7 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test post budget should return not supported'() {
         given:
-        account = new AccountBuilder().setName('Test Account').persist(accountService)
+        account = accountBuilder().setName('Test Account').persist()
         def budget = new Budget(name: 'Test Budget', amount: 100, frequency: WEEKLY, account: account)
 
         when:
@@ -47,7 +43,12 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test get budget'() {
         given:
-        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
+        def budget = budgetBuilder()
+                .setAccount(account)
+                .setName('Test Budget')
+                .setAmount(100)
+                .setFrequency(WEEKLY)
+                .persist()
 
         when:
         def response = restTemplate.getForEntity('/budget/{id}', Budget, budget.id)
@@ -66,7 +67,12 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test update budget'() {
         given:
-        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
+        def budget = budgetBuilder()
+                .setAccount(account)
+                .setName('Test Budget')
+                .setAmount(100)
+                .setFrequency(WEEKLY)
+                .persist()
 
         when:
         def properties = [name: 'Updated Budget Name']
@@ -78,7 +84,12 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test delete budget'() {
         given:
-        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
+        def budget = budgetBuilder()
+                .setAccount(account)
+                .setName('Test Budget')
+                .setAmount(100)
+                .setFrequency(WEEKLY)
+                .persist()
 
         when:
         restTemplate.delete('/budget/{id}', budget.id)
@@ -89,13 +100,17 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test budget balance is correctly calculated'() {
         given:
-        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
+        def budget = budgetBuilder()
+                .setAccount(account)
+                .setName('Test Budget')
+                .setAmount(100)
+                .setFrequency(WEEKLY)
+                .persist()
 
         and:
-        TransactionBuilder.from(account).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName('Test Budget').setAmount(100).persist(allocationRepository)
-            AllocationBuilder.from(it).setName('Another Budget').setAmount(200).persist(allocationRepository)
-        }
+        transactionBuilder().setAccount(account)
+                .addAllocation { setName('Test Budget').setAmount(100) }
+                .addAllocation { setName('Another Budget').setAmount(200) }
 
         when:
         def response = restTemplate.getForEntity('/budget/{id}', Budget, budget.id)
@@ -107,8 +122,8 @@ class BudgetControllerSpec extends BaseControllerSpec {
         response.body.balance == 100
 
         when:
-        TransactionBuilder.from(account).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName('Test Budget').setAmount(-25).persist(allocationRepository)
+        transactionBuilder().setAccount(account).addAllocation {
+            setName('Test Budget').setAmount(-25)
         }
 
         and:
@@ -119,8 +134,5 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
         and:
         response.body.balance == 75
-
-        cleanup:
-        cleanupAccounts()
     }
 }

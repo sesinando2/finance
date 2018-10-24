@@ -2,12 +2,8 @@ package net.dlcruz.finance.dao.repository
 
 import net.dlcruz.finance.config.IntegrationTestConfiguration
 import net.dlcruz.finance.controller.base.BaseIntegrationSpec
+import net.dlcruz.finance.dao.domain.Goal
 import net.dlcruz.finance.dao.service.AccountService
-import net.dlcruz.finance.fixture.AccountBuilder
-import net.dlcruz.finance.fixture.AllocationBuilder
-import net.dlcruz.finance.fixture.BudgetBuilder
-import net.dlcruz.finance.fixture.GoalBuilder
-import net.dlcruz.finance.fixture.TransactionBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -27,20 +23,20 @@ class BudgetRepositoryIntegrationSpec extends BaseIntegrationSpec {
 
     void 'should not include completed goals'() {
         given:
-        def account = new AccountBuilder().persist(accountService)
+        def account = accountBuilder().persist()
 
         and:
-        def budget = BudgetBuilder.from(account).persist(repository)
-        def goal = GoalBuilder.from(account).setTargetDate(new Date()).persist(goalRepository)
+        def budget = budgetBuilder().setAccount(account).persist()
+        def goal = goalBuilder().setAccount(account).setTargetDate(new Date()).persist()
 
         and:
-        def goal2 = GoalBuilder.from(account).setTargetDate(getMonths(6).ago).persist(goalRepository)
-        def goal3 = GoalBuilder.from(account).setTargetDate(getDay(1).ago).persist(goalRepository)
+        def goal2 = goalBuilder().setAccount(account).setTargetDate(getMonths(6).ago).persist()
+        def goal3 = goalBuilder().setAccount(account).setTargetDate(getDay(1).ago).persist()
 
         and:
-        def completedGoal = GoalBuilder.from(account).persist(goalRepository)
-        TransactionBuilder.from(account).persist(transactionRepository).with {
-            AllocationBuilder.from(it).setName(completedGoal.name).setAmount(5000).persist(allocationRepository)
+        def completedGoal = goalBuilder().setAccount(account).persist() as Goal
+        transactionBuilder().setAccount(account).addAllocation {
+            setName(completedGoal.name).setAmount(5000)
         }
 
         when:
@@ -48,9 +44,5 @@ class BudgetRepositoryIntegrationSpec extends BaseIntegrationSpec {
 
         then:
         results*.id == [budget.id, goal.id, goal2.id, goal3.id]
-    }
-
-    void cleanup() {
-        cleanupAccounts()
     }
 }

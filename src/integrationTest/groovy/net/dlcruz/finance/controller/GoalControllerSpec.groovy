@@ -6,8 +6,6 @@ import net.dlcruz.finance.controller.base.BaseControllerSpec
 import net.dlcruz.finance.dao.domain.Goal
 import net.dlcruz.finance.dao.service.AccountService
 import net.dlcruz.finance.dao.service.GoalService
-import net.dlcruz.finance.fixture.AccountBuilder
-import net.dlcruz.finance.fixture.GoalBuilder
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,8 +45,8 @@ class GoalControllerSpec extends BaseControllerSpec {
 
     void 'should be able get the goal through the goal endpoint'() {
         given:
-        def account = new AccountBuilder().persist(accountService)
-        goal = GoalBuilder.from(account).persist(goalRepository)
+        def account = accountBuilder().persist()
+        goal = goalBuilder().setAccount(account).persist()
 
         when:
         def response = restTemplate.getForEntity('/goal/{id}', Goal, goal.id)
@@ -99,8 +97,5 @@ class GoalControllerSpec extends BaseControllerSpec {
 
         then:
         response.statusCode == HttpStatus.BAD_REQUEST
-
-        cleanup:
-        cleanupAccounts()
     }
 }

@@ -1,6 +1,7 @@
 package net.dlcruz.finance.controller.base
 
 import net.dlcruz.finance.dao.repository.*
+import net.dlcruz.finance.fixture.TestDataService
 import net.dlcruz.finance.service.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.TestingAuthenticationToken
@@ -12,6 +13,10 @@ class BaseIntegrationSpec extends Specification {
 
     @Autowired
     SecurityService securityService
+
+    @Delegate
+    @Autowired
+    TestDataService testDataService
 
     @Autowired
     AccountRepository accountRepository
@@ -29,7 +34,11 @@ class BaseIntegrationSpec extends Specification {
     TransactionRepository transactionRepository
 
     void setup() {
-        securityService.getAuthentication() >> new TestingAuthenticationToken(TEST_USER, null)
+        securityService.getAuthentication() >> new TestingAuthenticationToken(authenticatedUser, null)
+    }
+
+    protected String getAuthenticatedUser() {
+        TEST_USER
     }
 
     protected void cleanupAccounts() {
