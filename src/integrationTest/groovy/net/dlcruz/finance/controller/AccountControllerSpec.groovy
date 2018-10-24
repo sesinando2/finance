@@ -7,6 +7,8 @@ import net.dlcruz.finance.dao.domain.*
 import net.dlcruz.finance.dao.service.AccountService
 import net.dlcruz.finance.dao.service.AllocationService
 import net.dlcruz.finance.dao.service.TransactionService
+import net.dlcruz.finance.fixture.AllocationBuilder
+import net.dlcruz.finance.fixture.TransactionBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -198,9 +200,13 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'should be able to get the list of paginated results'() {
         given:
-        def transaction = testDataService.newTransactionBuilder(account)
-                .newAllocation().setName('Test Allocation 1').setAmount(100)
-                .transactionBuilder.build().entity
+        def transaction = TransactionBuilder.from(account).persist(transactionService)
+
+        and:
+        AllocationBuilder.from(transaction)
+                .setName('Test Allocation 1')
+                .setAmount(100)
+                .persist(allocationService)
 
         when:
         def response = restTemplate.getForEntity("/account/{id}/transaction/page?page=$page&size=$size", Map, account.id)
@@ -229,10 +235,11 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'should be able to calculate the account balance correctly'() {
         given:
-        transaction = testDataService.newTransactionBuilder(account)
-                .newAllocation().setName('Allocation 1').setAmount(200)
-                .transactionBuilder.newAllocation().setName('Allocation 2').setAmount(-300)
-                .transactionBuilder.build().entity
+        transaction = TransactionBuilder.from(account).persist(transactionService)
+
+        and:
+        AllocationBuilder.from(transaction).setName('Allocation 1').setAmount(200).persist(allocationService)
+        AllocationBuilder.from(transaction).setName('Allocation 2').setAmount(-300).persist(allocationService)
 
         when:
         def response = restTemplate.getForEntity('/account/{id}', Account, account.id)
@@ -244,10 +251,10 @@ class AccountControllerSpec extends BaseControllerSpec {
 
     void 'should be able to calculate account breakdown'() {
         given:
-        transaction = testDataService
-                .newTransactionBuilder(account).setDate(date)
-                .newAllocation().setName(budget.name).setAmount(amount)
-                .transactionBuilder.build().entity
+        transaction = TransactionBuilder.from(account).setDate(date).persist(transactionService)
+
+        and:
+        AllocationBuilder.from(transaction).setName(budget.name).setAmount(amount).persist(allocationService)
 
         when:
         def response = restTemplate.getForEntity("/account/{id}/$frequency-breakdown", List, account.id)

@@ -1,67 +1,40 @@
 package net.dlcruz.finance.fixture
 
 import groovy.time.TimeCategory
+import groovy.transform.builder.Builder
+import groovy.transform.builder.ExternalStrategy
+import net.dlcruz.finance.dao.domain.Account
+import net.dlcruz.finance.dao.domain.Budget
 import net.dlcruz.finance.dao.domain.Frequency
 import net.dlcruz.finance.dao.domain.Goal
+import net.dlcruz.finance.dao.repository.BudgetRepository
+import net.dlcruz.finance.dao.repository.GoalRepository
+import net.dlcruz.finance.dao.service.BudgetService
 import net.dlcruz.finance.dao.service.GoalService
-import org.codehaus.groovy.runtime.InvokerHelper
 
-class GoalBuilder extends TestDataBuilder<Goal, GoalBuilder> {
+@Builder(builderStrategy = ExternalStrategy, forClass = Goal, prefix = 'set', excludes = ['metaClass'])
+class GoalBuilder extends AbstractBudgetTestDataBuilder<Goal> {
 
-    private AccountBuilder accountBuilder
+    static GoalBuilder from(Account account) {
+        new GoalBuilder().setAccount(account)
+    }
 
-    private GoalService goalService
-
-    private String name
-    private Frequency frequency
-    private BigDecimal targetAmount
-    private Date targetDate
-
-    protected GoalBuilder(Goal entity = null, GoalService goalService, AccountBuilder accountBuilder) {
-        super(entity)
-
-        this.goalService = goalService
-        this.accountBuilder = accountBuilder
-
-        this.name = "Test Goal ${System.currentTimeMillis()}"
-        this.frequency = Frequency.MONTHLY
-        this.targetAmount = 5000
+    GoalBuilder() {
+        name = "Test Goal ${System.currentTimeMillis()}"
+        frequency = Frequency.MONTHLY
+        amount = 0
+        targetAmount = 5000
 
         use(TimeCategory) {
-            this.targetDate = 6.month.from.now
+            targetDate = 6.month.from.now
         }
     }
 
-    @Override
-    Goal doBuild() {
-        def account = accountBuilder.entity
-        def goal = new Goal()
-        additionalProperties << [name: name, frequency: frequency, targetAmount: targetAmount, targetDate: targetDate, account: account, amount: targetAmount]
-        InvokerHelper.setProperties(goal, additionalProperties)
-        goalService.create(goal)
+    Goal persist(GoalService service) {
+        service.create(build())
     }
 
-    GoalBuilder setName(String name) {
-        this.name = name
-        this
-    }
-
-    GoalBuilder setFrequency(Frequency frequency) {
-        this.frequency = frequency
-        this
-    }
-
-    GoalBuilder setTargetAmount(BigDecimal targetAmount) {
-        this.targetAmount = targetAmount
-        this
-    }
-
-    GoalBuilder setTargetDate(Date targetDate) {
-        this.targetDate = targetDate
-        this
-    }
-
-    AccountBuilder getAccountBuilder() {
-        accountBuilder
+    Goal persist(GoalRepository repository) {
+        repository.save(build())
     }
 }

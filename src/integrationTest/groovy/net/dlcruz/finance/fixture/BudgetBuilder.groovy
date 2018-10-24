@@ -1,59 +1,29 @@
 package net.dlcruz.finance.fixture
 
+import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Budget
-import net.dlcruz.finance.dao.domain.Frequency
+import net.dlcruz.finance.dao.repository.BudgetRepository
 import net.dlcruz.finance.dao.service.BudgetService
-import org.codehaus.groovy.runtime.InvokerHelper
 
-class BudgetBuilder extends TestDataBuilder<Budget, BudgetBuilder> {
+import static net.dlcruz.finance.dao.domain.Frequency.MONTHLY
 
-    private BudgetService budgetService
+class BudgetBuilder extends AbstractBudgetTestDataBuilder<Budget> {
 
-    private AccountBuilder accountBuilder
-
-    private String name
-    private BigDecimal amount
-    private Frequency frequency
-
-    BudgetBuilder(Budget budget = null,
-                  BudgetService budgetService,
-                  AccountBuilder accountBuilder) {
-
-        super(budget)
-
-        this.budgetService = budgetService
-        this.accountBuilder = accountBuilder
-
-        this.name = "Test Budget ${System.currentTimeMillis()}"
-        this.amount = 500
-        this.frequency = Frequency.MONTHLY
+    static BudgetBuilder from(Account account) {
+        new BudgetBuilder().setAccount(account)
     }
 
-    BudgetBuilder setName(String name) {
-        this.name = name
-        this
+    BudgetBuilder() {
+        name = "Test Budget ${System.currentTimeMillis()}"
+        amount = 500
+        frequency = MONTHLY
     }
 
-    BudgetBuilder setAmount(BigDecimal amount) {
-        this.amount = amount
-        this
+    Budget persist(BudgetService service) {
+        service.create(build())
     }
 
-    BudgetBuilder setFrequency(Frequency frequency) {
-        this.frequency = frequency
-        this
-    }
-
-    @Override
-    Budget doBuild() {
-        def account = accountBuilder.entity
-        def budget = new Budget()
-        additionalProperties << [name: this.name, amount: this.amount, frequency: this.frequency, account: account]
-        InvokerHelper.setProperties(budget, additionalProperties)
-        this.budgetService.create(budget)
-    }
-
-    AccountBuilder getAccountBuilder() {
-        accountBuilder
+    Budget persist(BudgetRepository repository) {
+        repository.save(build())
     }
 }

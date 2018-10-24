@@ -4,7 +4,10 @@ import groovy.time.TimeCategory
 import net.dlcruz.finance.config.IntegrationTestConfiguration
 import net.dlcruz.finance.controller.base.BaseControllerSpec
 import net.dlcruz.finance.dao.domain.Goal
+import net.dlcruz.finance.dao.service.AccountService
 import net.dlcruz.finance.dao.service.GoalService
+import net.dlcruz.finance.fixture.AccountBuilder
+import net.dlcruz.finance.fixture.GoalBuilder
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +24,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
 class GoalControllerSpec extends BaseControllerSpec {
+
+    @Autowired
+    AccountService accountService
 
     @Autowired
     GoalService goalService
@@ -41,7 +47,8 @@ class GoalControllerSpec extends BaseControllerSpec {
 
     void 'should be able get the goal through the goal endpoint'() {
         given:
-        goal = testDataService.newGoalBuilder().entity
+        def account = new AccountBuilder().persist(accountService)
+        goal = GoalBuilder.from(account).persist(goalRepository)
 
         when:
         def response = restTemplate.getForEntity('/goal/{id}', Goal, goal.id)

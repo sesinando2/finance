@@ -1,49 +1,20 @@
 package net.dlcruz.finance.fixture
 
+import groovy.transform.builder.Builder
+import groovy.transform.builder.ExternalStrategy
 import net.dlcruz.finance.dao.domain.Allocation
-import org.codehaus.groovy.runtime.InvokerHelper
+import net.dlcruz.finance.dao.domain.Transaction
 
-class AllocationBuilder extends TestDataBuilder<Allocation, AllocationBuilder> {
+@Builder(builderStrategy = ExternalStrategy, forClass = Allocation, prefix = 'set', excludes = ['metaClass'])
+class AllocationBuilder extends TestDataBuilder<Allocation> {
 
-    private TransactionBuilder transactionBuilder
-
-    private String name
-    private BigDecimal amount
-
-    protected AllocationBuilder(Allocation entity = null, TransactionBuilder transactionBuilder) {
-        super(entity)
-
-        this.transactionBuilder = transactionBuilder
-
-        this.name = "Test Allocation ${System.currentTimeMillis()}"
-        this.amount = 200
+    static AllocationBuilder from(Transaction transaction) {
+        new AllocationBuilder().setTransaction(transaction)
     }
 
-    AllocationBuilder setName(String name) {
-        this.name = name
-        this
-    }
-
-    AllocationBuilder setAmount(BigDecimal amount) {
-        this.amount = amount
-        this
-    }
-
-    @Override
-    Allocation doBuild() {
-        def allocation = new Allocation()
-        additionalProperties << [name: name, amount: amount]
-        InvokerHelper.setProperties(allocation, additionalProperties)
-        allocation
-    }
-
-    @Override
-    AllocationBuilder build() {
-        transactionBuilder.build()
-        this
-    }
-
-    TransactionBuilder getTransactionBuilder() {
-        transactionBuilder
+    AllocationBuilder() {
+        name = "Test Allocation ${System.currentTimeMillis()}"
+        amount = 200
+        transaction = []
     }
 }

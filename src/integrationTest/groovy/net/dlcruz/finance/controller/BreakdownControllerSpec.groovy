@@ -2,6 +2,13 @@ package net.dlcruz.finance.controller
 
 import net.dlcruz.finance.config.IntegrationTestConfiguration
 import net.dlcruz.finance.controller.base.BaseControllerSpec
+import net.dlcruz.finance.dao.service.AccountService
+import net.dlcruz.finance.dao.service.BudgetService
+import net.dlcruz.finance.fixture.AccountBuilder
+import net.dlcruz.finance.fixture.AllocationBuilder
+import net.dlcruz.finance.fixture.BudgetBuilder
+import net.dlcruz.finance.fixture.TransactionBuilder
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
@@ -15,27 +22,39 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Import(IntegrationTestConfiguration)
 class BreakdownControllerSpec extends BaseControllerSpec {
 
+    @Autowired
+    AccountService accountService
+
     void 'should return all accounts breakdown'() {
         given:
-        testDataService.newAccountBuilder().setName('Test Breakdown Account 1').build().
-                newBudgetBuilder().setName('Test Budget 1').setAmount(100).setFrequency(WEEKLY).build().
-                accountBuilder.newTransactionBuilder().
-                    newAllocation().setName('Test Budget 1').setAmount(100).transactionBuilder.
-                    newAllocation().setName('Test Budget 3').setAmount(200).
-                transactionBuilder.build()
-
+        def account = new AccountBuilder().setName('Test Breakdown Account 1').persist(accountService)
+        def budget = BudgetBuilder.from(account).setName('Test Budget 1').setAmount(100).setFrequency(WEEKLY).persist(budgetRepository)
+        def transaction = TransactionBuilder.from(account).persist(transactionRepository)
 
         and:
-        testDataService.newAccountBuilder().setName('Test Breakdown Account 2').build().
-                newBudgetBuilder().setName('Test Budget 2').setAmount(200).setFrequency(WEEKLY).build().
-                accountBuilder.
-                newTransactionBuilder().newAllocation().setName('Test Budget 2').setAmount(200).transactionBuilder.build().
-                accountBuilder.
-                newTransactionBuilder().newAllocation().setName('Test Budget 2').setAmount(-50).transactionBuilder.build().
-                accountBuilder.
-                newTransactionBuilder().newAllocation().setName('Test Budget 2').setAmount(-25).transactionBuilder.build().
-                accountBuilder.
-                newTransactionBuilder().newAllocation().setName('Test Budget 2').setAmount(50).transactionBuilder.build()
+        AllocationBuilder.from(transaction).setName(budget.name).setAmount(100).persist(allocationRepository)
+        AllocationBuilder.from(transaction).setName('Test Budget 3').setAmount(200).persist(allocationRepository)
+
+        and:
+        def anotherAccount = new AccountBuilder().setName('Test Breakdown Account 2').persist(accountService)
+        def anotherBudget = BudgetBuilder.from(anotherAccount).setName('Test Budget 2').setAmount(200).setFrequency(WEEKLY).persist(budgetRepository)
+
+        and:
+        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(200).persist(allocationRepository)
+        }
+
+        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(-50).persist(allocationRepository)
+        }
+
+        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(-25).persist(allocationRepository)
+        }
+
+        TransactionBuilder.from(anotherAccount).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName(anotherBudget.name).setAmount(50).persist(allocationRepository)
+        }
 
         when:
         def response = restTemplate.getForEntity('/weekly-breakdown', List)

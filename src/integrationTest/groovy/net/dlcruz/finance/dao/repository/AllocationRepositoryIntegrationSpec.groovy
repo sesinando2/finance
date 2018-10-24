@@ -2,9 +2,10 @@ package net.dlcruz.finance.dao.repository
 
 import net.dlcruz.finance.config.IntegrationTestConfiguration
 import net.dlcruz.finance.controller.base.BaseIntegrationSpec
-import net.dlcruz.finance.fixture.IntegrationTestDataService
-import org.joda.time.DateTime
-import org.joda.time.Period
+import net.dlcruz.finance.dao.service.AccountService
+import net.dlcruz.finance.fixture.AccountBuilder
+import net.dlcruz.finance.fixture.AllocationBuilder
+import net.dlcruz.finance.fixture.TransactionBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -14,26 +15,28 @@ import org.springframework.context.annotation.Import
 class AllocationRepositoryIntegrationSpec extends BaseIntegrationSpec {
 
     @Autowired
-    AllocationRepository repository
+    AccountService accountService
 
     @Autowired
-    IntegrationTestDataService testDataService
+    AllocationRepository repository
 
     void 'should be able to find all allocations by account'() {
         given:
-        def account1 = testDataService.newAccountBuilder().entity
-        def transaction = testDataService.newTransactionBuilder(account1)
-                .newAllocation().setName('Test Transaction 111').setAmount(100).transactionBuilder
-                .newAllocation().setName('Test Transaction 112').setAmount(200).transactionBuilder.entity
+        def account1 = new AccountBuilder().persist(accountService)
+        def transaction = TransactionBuilder.from(account1).persist(transactionRepository)
+        AllocationBuilder.from(transaction).setName('Test Transaction 111').setAmount(100).persist(allocationRepository)
+        AllocationBuilder.from(transaction).setName('Test Transaction 112').setAmount(200).persist(allocationRepository)
 
-        testDataService.newTransactionBuilder(account1)
-                .newAllocation().setName('Test Transaction 121').setAmount(300).transactionBuilder
-                .newAllocation().setName('Test Transaction 112').setAmount(400).build()
+        TransactionBuilder.from(account1).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName('Test Transaction 121').setAmount(300).persist(allocationRepository)
+            AllocationBuilder.from(it).setName('Test Transaction 112').setAmount(400).persist(allocationRepository)
+        }
 
         and:
-        def account2 = testDataService.newAccountBuilder().entity
-        testDataService.newTransactionBuilder(account2)
-                .newAllocation().setName('Test Transaction 211').setAmount(500).transactionBuilder.build()
+        def account2 = new AccountBuilder().persist(accountService)
+        TransactionBuilder.from(account2).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName('Test Transaction 211').setAmount(500).persist(allocationRepository)
+        }
 
         when:
         def result = repository.findAllByAccount(account1)

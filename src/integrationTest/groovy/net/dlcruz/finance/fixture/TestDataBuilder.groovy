@@ -1,35 +1,18 @@
 package net.dlcruz.finance.fixture
 
-abstract class TestDataBuilder<OutputType, BuilderType extends TestDataBuilder> {
+import net.dlcruz.finance.dao.domain.JpaEntity
+import net.dlcruz.finance.dao.service.base.EntityService
+import org.springframework.data.jpa.repository.JpaRepository
 
-    protected Map additionalProperties = [:]
+abstract class TestDataBuilder<T extends JpaEntity<?>> {
 
-    private OutputType entity
+    abstract T build()
 
-    protected TestDataBuilder(OutputType entity) {
-        this.entity = entity
+    T persist(EntityService<T, ?> service) {
+        service.create(build())
     }
 
-    protected abstract OutputType doBuild()
-
-    BuilderType build() {
-        if (!entity) {
-            this.entity = doBuild()
-        }
-
-        this
-    }
-
-    BuilderType additionalProperties(Map properties) {
-        this.additionalProperties << properties
-        this
-    }
-
-    OutputType getEntity() {
-        if (!entity) {
-            build()
-        }
-
-        entity
+    T persist(JpaRepository<T, ?> repository) {
+        repository.save(build())
     }
 }

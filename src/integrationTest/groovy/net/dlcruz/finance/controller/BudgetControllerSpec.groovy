@@ -4,7 +4,12 @@ import net.dlcruz.finance.config.IntegrationTestConfiguration
 import net.dlcruz.finance.controller.base.BaseControllerSpec
 import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Budget
+import net.dlcruz.finance.dao.service.AccountService
 import net.dlcruz.finance.dao.service.BudgetService
+import net.dlcruz.finance.fixture.AccountBuilder
+import net.dlcruz.finance.fixture.AllocationBuilder
+import net.dlcruz.finance.fixture.BudgetBuilder
+import net.dlcruz.finance.fixture.TransactionBuilder
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
@@ -21,13 +26,16 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 class BudgetControllerSpec extends BaseControllerSpec {
 
     @Autowired
+    AccountService accountService
+
+    @Autowired
     BudgetService budgetService
 
     @Shared Account account
 
     void 'test post budget should return not supported'() {
         given:
-        account = testDataService.newAccountBuilder().setName('Test Account').build().entity
+        account = new AccountBuilder().setName('Test Account').persist(accountService)
         def budget = new Budget(name: 'Test Budget', amount: 100, frequency: WEEKLY, account: account)
 
         when:
@@ -39,7 +47,7 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test get budget'() {
         given:
-        def budget = testDataService.newBudgetBuilder(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).build().entity
+        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
 
         when:
         def response = restTemplate.getForEntity('/budget/{id}', Budget, budget.id)
@@ -58,7 +66,7 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test update budget'() {
         given:
-        def budget = testDataService.newBudgetBuilder(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).build().entity
+        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
 
         when:
         def properties = [name: 'Updated Budget Name']
@@ -70,7 +78,7 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test delete budget'() {
         given:
-        def budget = testDataService.newBudgetBuilder(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).build().entity
+        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
 
         when:
         restTemplate.delete('/budget/{id}', budget.id)
@@ -81,14 +89,13 @@ class BudgetControllerSpec extends BaseControllerSpec {
 
     void 'test budget balance is correctly calculated'() {
         given:
-        def budget = testDataService.newBudgetBuilder(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).build().entity
+        def budget = BudgetBuilder.from(account).setName('Test Budget').setAmount(100).setFrequency(WEEKLY).persist(budgetService)
 
         and:
-        testDataService.newTransactionBuilder(account).
-                newAllocation().setName('Test Budget').setAmount(100).
-                transactionBuilder.
-                newAllocation().setName('Another Budget').setAmount(200).
-                transactionBuilder.build()
+        TransactionBuilder.from(account).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName('Test Budget').setAmount(100).persist(allocationRepository)
+            AllocationBuilder.from(it).setName('Another Budget').setAmount(200).persist(allocationRepository)
+        }
 
         when:
         def response = restTemplate.getForEntity('/budget/{id}', Budget, budget.id)
@@ -100,9 +107,9 @@ class BudgetControllerSpec extends BaseControllerSpec {
         response.body.balance == 100
 
         when:
-        testDataService.newTransactionBuilder(account).
-                newAllocation().setName('Test Budget').setAmount(-25).
-                transactionBuilder.build()
+        TransactionBuilder.from(account).persist(transactionRepository).with {
+            AllocationBuilder.from(it).setName('Test Budget').setAmount(-25).persist(allocationRepository)
+        }
 
         and:
         response = restTemplate.getForEntity('/budget/{id}', Budget, budget.id)
