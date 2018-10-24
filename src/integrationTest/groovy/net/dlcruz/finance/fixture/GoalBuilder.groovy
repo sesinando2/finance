@@ -6,14 +6,14 @@ import groovy.transform.builder.Builder
 import groovy.transform.builder.ExternalStrategy
 import net.dlcruz.finance.dao.domain.Frequency
 import net.dlcruz.finance.dao.domain.Goal
-import net.dlcruz.finance.dao.service.GoalService
+import net.dlcruz.finance.dao.repository.GoalRepository
 
 @Builder(builderStrategy = ExternalStrategy, forClass = Goal, prefix = 'set', excludes = ['metaClass'])
 class GoalBuilder extends TestDataBuilder<Goal> {
 
     @PackageScope
-    GoalBuilder(GoalService service) {
-        super(service)
+    GoalBuilder(GoalRepository repository) {
+        super(repository)
 
         name = "Test Goal ${System.currentTimeMillis()}"
         frequency = Frequency.MONTHLY

@@ -7,12 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
-import spock.lang.Stepwise
 
 import static net.dlcruz.finance.dao.domain.Frequency.WEEKLY
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 
-@Stepwise
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
 class BreakdownControllerSpec extends BaseControllerSpec {
@@ -22,7 +20,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
 
     void 'should return all accounts breakdown'() {
         given:
-        def account = accountBuilder().setName('Test Breakdown Account 1').persist()
+        def account = accountBuilder().setName('Test Breakdown Account 1').setOwner('another_user').update()
 
         def budget = budgetBuilder().setAccount(account).setName('Test Budget 1').setAmount(100).setFrequency(WEEKLY).persist()
         transactionBuilder().setAccount(account)
@@ -31,7 +29,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
                 .persist()
 
         and:
-        def anotherAccount = accountBuilder().setName('Test Breakdown Account 2').persist()
+        def anotherAccount = accountBuilder().setName('Test Breakdown Account 2').setOwner('another_user').update()
         def anotherBudget = budgetBuilder().setAccount(anotherAccount).setName('Test Budget 2').setAmount(200).setFrequency(WEEKLY).persist()
 
         and:
@@ -52,6 +50,7 @@ class BreakdownControllerSpec extends BaseControllerSpec {
         }
 
         when:
+        setUser('another_user')
         def response = restTemplate.getForEntity('/weekly-breakdown', List)
         List<Map> breakdownList = response.body
 
@@ -90,9 +89,5 @@ class BreakdownControllerSpec extends BaseControllerSpec {
         budget3.totalCredit == 200
         budget3.totalDebit == 0
         budget3.allocatedAmount == 0
-    }
-    @Override
-    protected String getAuthenticatedUser() {
-        'another_user'
     }
 }

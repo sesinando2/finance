@@ -1,24 +1,24 @@
 package net.dlcruz.finance.fixture
 
 import net.dlcruz.finance.dao.domain.JpaEntity
-import net.dlcruz.finance.dao.service.base.EntityService
 import org.codehaus.groovy.runtime.InvokerHelper
+import org.springframework.data.jpa.repository.JpaRepository
 
 abstract class TestDataBuilder<T extends JpaEntity<?>> {
 
     private T entity
 
-    protected EntityService<T, ?> service
+    protected JpaRepository<T, ?> repository
 
-    protected TestDataBuilder(EntityService<T, ?> service) {
-        this.service = service
+    protected TestDataBuilder(JpaRepository<T, ?> repository) {
+        this.repository = repository
     }
 
     abstract T build()
 
     T persist() {
         if (!entity) {
-            entity = service.create(build())
+            entity = repository.saveAndFlush(build())
         }
 
         entity
@@ -27,20 +27,14 @@ abstract class TestDataBuilder<T extends JpaEntity<?>> {
     T update() {
         def entity = persist()
         def newObject = build() as GroovyObject
-        InvokerHelper.setProperties(entity, newObject.properties)
-        service.save(entity)
+        def updates = newObject.properties
+        updates.remove('id')
+        InvokerHelper.setProperties(entity, updates)
+        entity = repository.saveAndFlush(entity)
+        entity
     }
 
     T getEntity() {
         persist()
-    }
-
-    void setEntity(T entity) {
-        this.entity
-        reload()
-    }
-
-    protected void reload() {
-        entity = service.get(entity.id)
     }
 }

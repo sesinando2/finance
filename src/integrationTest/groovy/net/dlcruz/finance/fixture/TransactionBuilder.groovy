@@ -4,16 +4,16 @@ import groovy.transform.PackageScope
 import groovy.transform.builder.Builder
 import groovy.transform.builder.ExternalStrategy
 import net.dlcruz.finance.dao.domain.Transaction
-import net.dlcruz.finance.dao.service.AllocationService
-import net.dlcruz.finance.dao.service.TransactionService
+import net.dlcruz.finance.dao.repository.AllocationRepository
+import net.dlcruz.finance.dao.repository.TransactionRepository
 
 @Builder(builderStrategy = ExternalStrategy, forClass = Transaction, prefix = 'set', excludes = ['metaClass'])
 class TransactionBuilder extends TestDataBuilder<Transaction> {
 
-    AllocationService allocationService
+    AllocationRepository allocationRepository
 
     @PackageScope
-    TransactionBuilder(TransactionService service) {
+    TransactionBuilder(TransactionRepository service) {
         super(service)
 
         date = new Date()
@@ -21,10 +21,10 @@ class TransactionBuilder extends TestDataBuilder<Transaction> {
     }
 
     TransactionBuilder addAllocation(@DelegatesTo(AllocationBuilder) Closure closure) {
-        def builder = new AllocationBuilder(allocationService).setTransaction(entity)
+        def transaction = persist()
+        def builder = new AllocationBuilder(allocationRepository).setTransaction(transaction)
         builder.with(closure)
         builder.persist()
-        reload()
         this
     }
 }

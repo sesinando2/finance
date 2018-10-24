@@ -4,23 +4,19 @@ import groovy.transform.PackageScope
 import groovy.transform.builder.Builder
 import groovy.transform.builder.ExternalStrategy
 import net.dlcruz.finance.dao.domain.Account
-import net.dlcruz.finance.dao.service.AccountService
-import net.dlcruz.finance.dao.service.AllocationService
-import net.dlcruz.finance.dao.service.BudgetService
-import net.dlcruz.finance.dao.service.GoalService
-import net.dlcruz.finance.dao.service.TransactionService
+import net.dlcruz.finance.dao.repository.*
 
 @Builder(builderStrategy = ExternalStrategy, forClass = Account, prefix = 'set', excludes = ['metaClass'])
 class AccountBuilder extends TestDataBuilder<Account> {
 
-    BudgetService budgetService
-    GoalService goalService
-    TransactionService transactionService
-    AllocationService allocationService
+    BudgetRepository budgetRepository
+    GoalRepository goalRepository
+    TransactionRepository transactionRepository
+    AllocationRepository allocationRepository
 
     @PackageScope
-    AccountBuilder(AccountService service) {
-        super(service)
+    AccountBuilder(AccountRepository repository) {
+        super(repository)
 
         name = "Test Account ${System.currentTimeMillis()}"
         budgets = []
@@ -28,31 +24,28 @@ class AccountBuilder extends TestDataBuilder<Account> {
     }
 
     AccountBuilder addBudget(@DelegatesTo(BudgetBuilder) Closure closure) {
-        def builder = new BudgetBuilder(budgetService)
+        def builder = new BudgetBuilder(budgetRepository)
         builder.setAccount(entity)
         builder.with(closure)
         builder.persist()
-        reload()
         this
     }
 
     AccountBuilder addGoal(@DelegatesTo(GoalBuilder) Closure closure) {
-        def builder = new GoalBuilder(goalService)
+        def builder = new GoalBuilder(goalRepository)
         builder.setAccount(entity)
         builder.with(closure)
         builder.persist()
-        reload()
         this
     }
 
     AccountBuilder addTransaction(@DelegatesTo(TransactionBuilder) Closure closure) {
         def entity = persist()
-        def builder = new TransactionBuilder(transactionService)
+        def builder = new TransactionBuilder(transactionRepository)
         builder.setAccount(entity)
-        builder.setAllocationService(allocationService)
+        builder.setAllocationRepository(allocationRepository)
         builder.with(closure)
         builder.persist()
-        reload()
         this
     }
 }

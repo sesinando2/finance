@@ -4,7 +4,7 @@ import groovy.transform.PackageScope
 import groovy.transform.builder.Builder
 import groovy.transform.builder.ExternalStrategy
 import net.dlcruz.finance.dao.domain.Budget
-import net.dlcruz.finance.dao.service.BudgetService
+import net.dlcruz.finance.dao.repository.BudgetRepository
 
 import static net.dlcruz.finance.dao.domain.Frequency.MONTHLY
 
@@ -12,8 +12,8 @@ import static net.dlcruz.finance.dao.domain.Frequency.MONTHLY
 class BudgetBuilder extends TestDataBuilder<Budget> {
 
     @PackageScope
-    BudgetBuilder(BudgetService service) {
-        super(service)
+    BudgetBuilder(BudgetRepository repository) {
+        super(repository)
 
         name = "Test Budget ${System.currentTimeMillis()}"
         amount = 500

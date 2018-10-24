@@ -5,6 +5,7 @@ import net.dlcruz.finance.fixture.TestDataService
 import net.dlcruz.finance.service.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.TestingAuthenticationToken
+import org.springframework.security.core.context.SecurityContextHolder
 import spock.lang.Specification
 
 class BaseIntegrationSpec extends Specification {
@@ -34,18 +35,6 @@ class BaseIntegrationSpec extends Specification {
     TransactionRepository transactionRepository
 
     void setup() {
-        securityService.getAuthentication() >> new TestingAuthenticationToken(authenticatedUser, null)
-    }
-
-    protected String getAuthenticatedUser() {
-        TEST_USER
-    }
-
-    protected void cleanupAccounts() {
-        allocationRepository.deleteAll()
-        transactionRepository.deleteAll()
-        goalRepository.deleteAll()
-        budgetRepository.deleteAll()
-        accountRepository.deleteAll()
+        SecurityContextHolder.context.authentication = new TestingAuthenticationToken(TEST_USER, null, [] as String[])
     }
 }

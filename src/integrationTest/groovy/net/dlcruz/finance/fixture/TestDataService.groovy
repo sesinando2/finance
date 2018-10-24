@@ -1,6 +1,6 @@
 package net.dlcruz.finance.fixture
 
-import net.dlcruz.finance.dao.service.*
+import net.dlcruz.finance.dao.repository.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
@@ -8,44 +8,44 @@ import org.springframework.stereotype.Service
 class TestDataService {
 
     @Autowired
-    AccountService accountService
+    AccountRepository accountRepository
 
     @Autowired
-    BudgetService budgetService
+    BudgetRepository budgetRepository
 
     @Autowired
-    GoalService goalService
+    GoalRepository goalRepository
 
     @Autowired
-    TransactionService transactionService
+    TransactionRepository transactionRepository
 
     @Autowired
-    AllocationService allocationService
+    AllocationRepository allocationRepository
 
     AccountBuilder accountBuilder() {
-        def builder = new AccountBuilder(accountService)
-        builder.setBudgetService(budgetService)
-        builder.setGoalService(goalService)
-        builder.setTransactionService(transactionService)
-        builder.setAllocationService(allocationService)
+        def builder = new AccountBuilder(accountRepository)
+        builder.setBudgetRepository(budgetRepository)
+        builder.setGoalRepository(goalRepository)
+        builder.setTransactionRepository(transactionRepository)
+        builder.setAllocationRepository(allocationRepository)
         builder
     }
 
     BudgetBuilder budgetBuilder() {
-        new BudgetBuilder(budgetService)
+        new BudgetBuilder(budgetRepository)
     }
 
     GoalBuilder goalBuilder() {
-        new GoalBuilder(goalService)
+        new GoalBuilder(goalRepository)
     }
 
     TransactionBuilder transactionBuilder() {
-        def builder = new TransactionBuilder(transactionService)
-        builder.allocationService = allocationService
+        def builder = new TransactionBuilder(transactionRepository)
+        builder.setAllocationRepository(allocationRepository)
         builder
     }
 
     AllocationBuilder allocationBuilder() {
-        new AllocationBuilder(allocationService)
+        new AllocationBuilder(allocationRepository)
     }
 }
