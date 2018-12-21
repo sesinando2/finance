@@ -7,12 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
+import spock.lang.Stepwise
 
 import static net.dlcruz.finance.dao.domain.Frequency.WEEKLY
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Import(IntegrationTestConfiguration)
+@Stepwise
 class BreakdownControllerSpec extends BaseControllerSpec {
 
     @Autowired

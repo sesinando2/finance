@@ -2,7 +2,6 @@ package net.dlcruz.finance.dao.service
 
 import net.dlcruz.finance.dao.domain.Account
 import net.dlcruz.finance.dao.domain.Allocation
-import net.dlcruz.finance.dao.domain.Budget
 import net.dlcruz.finance.dao.domain.Transaction
 import net.dlcruz.finance.dao.service.base.EntityService
 
@@ -25,6 +24,8 @@ interface AllocationService extends EntityService<Allocation, Long> {
     Date getFirstTransactionDateBefore(Account account, Date date, String name)
 
     Date getlastTransactionDateUpTo(Account account, Date date, String name)
+
+    Date getLastAllocatedCredit(Account account, String name)
 
     List<Allocation> findAllByTransaction(Transaction transaction)
 

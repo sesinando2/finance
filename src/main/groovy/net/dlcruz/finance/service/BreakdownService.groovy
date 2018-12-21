@@ -39,7 +39,7 @@ class BreakdownService {
 
     List<Breakdown> getTrendsFrom(Frequency frequency, Account account = null, int ago = 12) {
         def accounts = account ? [account] : accountService.list()
-        (ago..1).collect {
+        (ago..0).collect {
             def startDate = frequencyService.getStartDateForBreakdown(frequency, it)
             def roundedDownStartDate = frequencyService.getRoundedDownStartDate(startDate, frequency)
             def endDate = frequencyService.getEndDateForBreakdown(frequency, roundedDownStartDate)

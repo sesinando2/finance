@@ -56,59 +56,34 @@ class FrequencyService {
     }
 
     Date getStartDateForBreakdown(Frequency frequency, int ago = 1) {
-        Calendar calendar = Calendar.instance
-
-        switch (frequency) {
-            case Frequency.DAILY:
-                calendar.add(Calendar.DAY_OF_YEAR, -1 * ago)
-                return calendar.time
-
-            case Frequency.WEEKLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, -1 * ago)
-                break
-
-            case Frequency.FORTNIGHTLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, -2 * ago)
-                break
-
-            case Frequency.MONTHLY:
-                calendar.add(Calendar.MONTH, -1 * ago)
-                break
-
-            case Frequency.ANNUALLY:
-                calendar.add(Calendar.YEAR, -1 * ago)
-                break
-        }
-
-        calendar.time
+        getRelatedDateTo(new Date(), frequency, -ago).time
     }
 
     Date getEndDateForBreakdown(Frequency frequency, Date startDate) {
-        Calendar calendar = startDate.toCalendar()
-
-        switch (frequency) {
-            case Frequency.DAILY:
-                calendar.add(Calendar.DAY_OF_YEAR,1)
-                break
-
-            case Frequency.WEEKLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, 1)
-                break
-
-            case Frequency.FORTNIGHTLY:
-                calendar.add(Calendar.WEEK_OF_YEAR, 2)
-                break
-
-            case Frequency.MONTHLY:
-                calendar.add(Calendar.MONTH, 1)
-                break
-
-            case Frequency.ANNUALLY:
-                calendar.add(Calendar.YEAR, 1)
-                break
-        }
-
+        def calendar = getRelatedDateTo(startDate, frequency, 1)
         calendar.add(Calendar.DAY_OF_YEAR, -1)
+        calendar.time
+    }
+
+    Calendar getRelatedDateTo(Date date, Frequency frequency, int gap) {
+        def calendar = date.toCalendar()
+        calendar.add(getCorrespondingCalendarField(frequency), getModifierFor(frequency, gap))
+        calendar
+    }
+
+    Date getRoundedDownStartDate(Date date, Frequency frequency) {
+        def calendar = date.clearTime().toCalendar()
+        setActualForRounding(Actual.MINIMUM, frequency, calendar)
+        calendar.time
+    }
+
+    Date getRoundedUpEndDate(Date date, Frequency frequency) {
+        def calendar = date.toCalendar()
+        setActualForRounding(Actual.MAXIMUM, frequency, calendar)
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY))
+        calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE))
+        calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND))
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND))
         calendar.time
     }
 
@@ -118,27 +93,14 @@ class FrequencyService {
         new Interval(from.time, to.time)
     }
 
-    Date getRoundedDownStartDate(Date date, Frequency frequency) {
-        def calendar = date.clearTime().toCalendar()
-        getCalendarField(frequency)?.with {
-            calendar.set(it, calendar.getActualMinimum(it))
+    private void setActualForRounding(Actual actual, Frequency frequency, Calendar calendar) {
+        if (frequency != DAILY) {
+            def calendarField = getCalendarFieldToRound(frequency)
+            calendar.set(calendarField, actual.value(calendar, calendarField))
         }
-        calendar.time
     }
 
-    Date getRoundedUpEndDate(Date date, Frequency frequency) {
-        def calendar = date.toCalendar()
-        getCalendarField(frequency)?.with {
-            calendar.set(it, calendar.getActualMaximum(it))
-        }
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMaximum(Calendar.HOUR_OF_DAY))
-        calendar.set(Calendar.MINUTE, calendar.getActualMaximum(Calendar.MINUTE))
-        calendar.set(Calendar.SECOND, calendar.getActualMaximum(Calendar.SECOND))
-        calendar.set(Calendar.MILLISECOND, calendar.getActualMaximum(Calendar.MILLISECOND))
-        calendar.time
-    }
-
-    private Integer getCalendarField(Frequency frequency) {
+    private Integer getCalendarFieldToRound(Frequency frequency) {
         switch (frequency) {
             case WEEKLY:
             case FORTNIGHTLY:
@@ -152,6 +114,32 @@ class FrequencyService {
 
             default:
                 return null
+        }
+    }
+
+    private Integer getCorrespondingCalendarField(Frequency frequency) {
+        switch (frequency) {
+            case DAILY:
+                return Calendar.DAY_OF_YEAR
+
+            case WEEKLY:
+            case FORTNIGHTLY:
+                return Calendar.WEEK_OF_MONTH
+
+            case MONTHLY:
+                return Calendar.MONTH
+
+            case ANNUALLY:
+                return Calendar.YEAR
+        }
+    }
+
+    private Integer getModifierFor(Frequency frequency, int modifier) {
+        switch (frequency) {
+            case FORTNIGHTLY:
+                return modifier * 2
+            default:
+                return modifier
         }
     }
 
@@ -206,6 +194,22 @@ class FrequencyService {
             if (conversion) {
                 return end
             }
+        }
+    }
+
+    private enum Actual {
+
+        MINIMUM({ Calendar calendar, int field -> calendar.getActualMinimum(field) }),
+        MAXIMUM({ Calendar calendar, int field -> calendar.getActualMaximum(field) })
+
+        private Closure<Integer> closure
+
+        private Integer value(Calendar calendar, int field) {
+            closure(calendar, field)
+        }
+
+        Actual(Closure closure) {
+            this.closure = closure
         }
     }
 }

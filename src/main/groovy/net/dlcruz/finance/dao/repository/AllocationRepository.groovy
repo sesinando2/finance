@@ -66,4 +66,7 @@ interface AllocationRepository extends JpaRepository<Allocation, Long> {
 
     @Query('select sum(a.amount) from Allocation a join a.transaction t where t.account = :account and a.name = :name and t.date >= :from and t.date <= :to and a.amount >= 0')
     BigDecimal getAccountAllocationTotalCredit(@Param('account') Account account, @Param('name') String name, @Param('from') Date date, @Param('to') Date to)
+
+    @Query('select max(t.date) from Allocation a join a.transaction t where t.account = :account and a.name = :name and a.amount > 0')
+    Timestamp getLastAllocatedCredit(@Param('account') Account account, @Param('name') String name)
 }

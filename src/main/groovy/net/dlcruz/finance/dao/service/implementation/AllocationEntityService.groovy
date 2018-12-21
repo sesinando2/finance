@@ -87,6 +87,11 @@ class AllocationEntityService extends BaseEntityService<Allocation, Long> implem
     }
 
     @Override
+    Date getLastAllocatedCredit(Account account, String name) {
+        repository.getLastAllocatedCredit(account, name)?.toCalendar()?.time
+    }
+
+    @Override
     BigDecimal sum(List<Allocation> allocations) {
         allocations.sum { Allocation allocation -> allocation.amount } ?: 0
     }

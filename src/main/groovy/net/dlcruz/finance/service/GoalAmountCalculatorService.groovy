@@ -10,15 +10,15 @@ class GoalAmountCalculatorService {
     @Autowired
     FrequencyService frequencyService
 
-    BigDecimal calculateAmount(Date targetDate, BigDecimal remainingAmount, Frequency frequency) {
-        def now = frequencyService.getRoundedDownStartDate(new Date(), frequency)
+    BigDecimal calculateAmount(Date from, Date targetDate, BigDecimal remainingAmount, Frequency frequency) {
+        def calculateFrom = frequencyService.getRoundedDownStartDate(from, frequency)
 
-        if (now >= targetDate) {
+        if (calculateFrom >= targetDate) {
             return remainingAmount
         }
 
         def roundedTargetDate = frequencyService.getRoundedUpEndDate(targetDate, frequency) + 1
-        def result = frequencyService.getDuration(now, roundedTargetDate, frequency)
+        def result = frequencyService.getDuration(calculateFrom, roundedTargetDate, frequency)
         result > 0 ? remainingAmount / result : remainingAmount
     }
 }

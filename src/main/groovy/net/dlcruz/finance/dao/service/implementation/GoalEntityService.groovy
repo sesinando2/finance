@@ -14,8 +14,6 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
-import javax.transaction.Transactional
-
 @Service
 class GoalEntityService extends BaseBudgetEntityService<Goal> implements GoalService {
 
@@ -66,9 +64,16 @@ class GoalEntityService extends BaseBudgetEntityService<Goal> implements GoalSer
         if (goal.completed) {
             goal.amount = 0
         } else if (goal.targetDate && goal.remainingBalance && goal.frequency) {
-            goal.amount = amountCalculatorService.calculateAmount(goal.targetDate, goal.remainingBalance, goal.frequency)
+            def from = getStartingDateToCalculateFrom(goal)
+            goal.amount = amountCalculatorService.calculateAmount(from, goal.targetDate, goal.remainingBalance, goal.frequency)
         }
 
         goal
+    }
+
+    private Date getStartingDateToCalculateFrom(Goal goal) {
+        def lastAllocatedCredit = allocationService.getLastAllocatedCredit(goal.account, goal.name)
+        def nextExpectedCreditAllocation = lastAllocatedCredit ? frequencyService.getRelatedDateTo(lastAllocatedCredit, goal.frequency, 1).time : new Date()
+        [nextExpectedCreditAllocation, new Date()].max()
     }
 }
