@@ -24,7 +24,7 @@ class GoalAmountCalculatorServiceSpec extends Specification {
         def targetDate = today + Period.parse(period)
 
         expect:
-        service.calculateAmount(targetDate.toDate(), targetAmount, frequency) == expected
+        service.calculateAmount(new Date(), targetDate.toDate(), targetAmount, frequency) == expected
 
         where:
         frequency   | period    | targetAmount   | expected
