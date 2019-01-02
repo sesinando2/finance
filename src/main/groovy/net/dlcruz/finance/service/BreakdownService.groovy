@@ -112,9 +112,9 @@ class BreakdownService {
         def startDate = frequencyService.getRoundedDownStartDate(first, frequency)
         def endDate = frequencyService.getRoundedUpEndDate(last, frequency) + 1
         def duration = frequencyService.getDuration(startDate, endDate, frequency)
-        def divisor = [1, duration].max()
-        breakdown.incomeRate = credit / divisor
-        breakdown.expenseRate = debit / divisor
+        def periodOfTime = [1, duration].max()
+        breakdown.incomeRate = calculateRate(credit, periodOfTime)
+        breakdown.expenseRate = calculateRate(debit, periodOfTime)
         breakdown
     }
 
@@ -124,5 +124,9 @@ class BreakdownService {
 
     private BigDecimal calculateTotalDebit(List<Allocation> allocations) {
         allocationService.sum(allocations.findAll { it.amount < 0 }) * (-1)
+    }
+
+    private BigDecimal calculateRate(BigDecimal amount, int periodOfTime) {
+        amount / periodOfTime
     }
 }
