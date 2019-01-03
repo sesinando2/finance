@@ -76,8 +76,9 @@ class BreakdownService {
     private List<Breakdown> getBreakdownBy(Frequency frequency, Date startingDate, Date endingDate, Account account) {
         def accountBudgets = budgetService.findAllByAccount(account)
         def allocationNames = allocationService.findAllNamesByAccount(account)
+        def labels = (accountBudgets*.name + allocationNames).unique()
 
-        allocationNames
+        labels
                 .collect(this.&createBreakdown.curry(frequency, account, accountBudgets, startingDate, endingDate))
                 .collect(this.&setAllocationRates.curry(frequency, account, endingDate))
     }
