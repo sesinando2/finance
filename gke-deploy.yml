@@ -46,16 +46,16 @@ spec:
                   name: cloudsql-db-credentials
                   key: password
             - name: SECURITY_OAUTH2_CLIENT_ACCESS-TOKEN-URI
-              value: http://35.201.27.17/oauth/token
+              value: http://35.244.87.129/oauth/token
             - name: SECURITY_OAUTH2_CLIENT_USER-AUTHORIZATION-URI
-              value: http://35.201.27.17/oauth/authorize
+              value: http://35.244.87.129/oauth/authorize
             - name: SECURITY_OAUTH2_RESOURCE_JWT_KEY-SET-URI
-              value: http://35.201.27.17/oauth/token_key
+              value: http://35.244.87.129/oauth/token_key
         - name: cloudsql-proxy
           image: gcr.io/cloudsql-docker/gce-proxy:1.11
           command: ["/cloud_sql_proxy",
-                    "-instances=alert-synapse-211723:australia-southeast1:mysql-db=tcp:3306",
-                    "-credential_file=/secrets/cloudsql/credentials.json"]
+                    "-instances=alert-synapse-211723:australia-southeast1:mysql-instance=tcp:3306",
+                    "-credential_file=/secrets/cloudsql/alert-synapse-211723-bc719d7724f8.json"]
           volumeMounts:
             - name: cloudsql-instance-credentials
               mountPath: /secrets/cloudsql
